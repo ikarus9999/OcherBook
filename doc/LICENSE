@@ -1,0 +1,21 @@
+OcherBook itself is GPLv3 or later.  See COPYING.
+
+
+OcherBook relies on several additional libraries:
+
+libclc:
+This is (a subset of) my personal C++ utility/portability library, shared
+among multiple projects.
+MIT license.
+See http://ccoffing.net/proj/libclc
+
+zlib:
+Permissive license.
+See http://www.gzip.org/zlib/zlib_license.html
+
+Mini-XML (mxml):
+Modified GPLv2.
+See http://minixml.org/documentation.php/license.html#LICENSE
+
+FreeType:
+

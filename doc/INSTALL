@@ -1,0 +1,13 @@
+Currently, OcherBook is not a full replacement for the Kobo's firmware.  It
+is only intended to replace "nickel".  The Kobo's kernel, boot scripts, and
+wireless networking are left as-is.
+
+You'll want to enable FTP and telnet access to your Kobo, upload "ocher",
+and replace nickel with it.
+
+Notes on rooting your Kobo:
+http://ccoffing.net/tech/embedded/kobo/
+
+Installation instructions:
+http://ccoffing.net/tech/proj/ocherbook/
+

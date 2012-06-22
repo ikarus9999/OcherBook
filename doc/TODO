@@ -1,0 +1,29 @@
+move unzip stuff to libclc?
+
+CSS
+
+layout pages in memory
+paginate
+
+browser
+
+quick way to pull out metadata - fast enough to not need a database
+- dc:title
+
+SDL on x86
+
+options to validate epubs?
+
+test harness
+valgrind across many epubs
+
+document complete walk-through of installing, recovery, etc
+
+
+fluffy features
+---------------
+
+keep personal log of books read (title, author, date, ...)?
+
+wirelessly sync with epubs on home server
+
