@@ -35,7 +35,7 @@ public:
             );
     ~LogAppenderFile();
     /**
-     *  When changing from async to blocking, does not return until all pending writes are 
+     *  When changing from async to blocking, does not return until all pending writes are
      *  completed.
      */
     void setAsync(bool async);

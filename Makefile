@@ -79,21 +79,17 @@ ZLIB_OBJS = \
 #################### miniXML
 
 MXML_VER=2.7
-#MXML_TGZ=$(DL_DIR)/mxml-$(MXML_VER).tar.gz
-MXML_DIR=mxml-$(MXML_VER)
+MXML_TGZ=$(DL_DIR)/mxml-$(MXML_VER).tar.gz
+MXML_DIR=$(BUILD_DIR)/mxml-$(MXML_VER)
+MXML_LIB=$(MXML_DIR)/libmxml.a
+
+$(MXML_LIB):
+	mkdir -p $(BUILD_DIR)
+	tar -zxf $(MXML_TGZ) -C $(BUILD_DIR)
+	cd $(MXML_DIR) && CFLAGS="$(CFLAGS_COMMON)" CC=$(CC) ./configure
+	cd $(MXML_DIR) && make
 
 INCS+=-I$(MXML_DIR)
-MXML_OBJS = \
-	mxml-2.7/mxml-attr.o \
-	mxml-2.7/mxml-entity.o \
-	mxml-2.7/mxml-file.o \
-	mxml-2.7/mxml-get.o \
-	mxml-2.7/mxml-index.o \
-	mxml-2.7/mxml-node.o \
-	mxml-2.7/mxml-private.o \
-	mxml-2.7/mxml-search.o \
-	mxml-2.7/mxml-set.o \
-	mxml-2.7/mxml-string.o
 
 
 #################### OcherBook
@@ -122,7 +118,6 @@ OCHER_OBJS = \
 	ocherbook/Layout.o \
 	ocherbook/UnzipCache.o \
 	ocherbook/main.o \
-	$(MXML_OBJS) \
 	$(ZLIB_OBJS)
 
 ifeq ($(TARGET),KoboTouch)
@@ -148,8 +143,8 @@ endif
 .cpp.o:
 	$(CXX) -c $(CFLAGS) $*.cpp -o $@
 
-ocher: $(ZLIB_LIB) $(FREETYPE_LIB) $(OCHER_OBJS)
-	$(CXX) $(LD_FLAGS) $(CFLAGS) -o $@ $(OCHER_OBJS) $(ZLIB_LIB) $(FREETYPE_LIB)
+ocher: $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB) $(OCHER_OBJS)
+	$(CXX) $(LD_FLAGS) $(CFLAGS) -o $@ $(OCHER_OBJS) $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB)
 
 clean:
 	/bin/rm -f $(OCHER_OBJS) ocher

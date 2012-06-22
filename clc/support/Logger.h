@@ -28,21 +28,26 @@ public:
      *  Clears all Logger instances, and all references to all LogAppenders.
      */
     void clear();
+
     /**
      *  Clears all references to the LogAppender.
      */
     void clearAppender(const LogAppender*);
+
     /**
      *  Creates a default root Logger.
      */
     void setRoot();
+
     void put(Logger* l);
+
     /**
      *  Returns the named Logger.  If it does not yet exist, it is created.  Ownership remains
      *  with the Loggers.
      *  @param[in] name  The name of the logger, in dotted form.
      */
     Logger* get(const char* name);
+
 protected:
 #ifndef SINGLE_THREADED
     friend class Logger;  // Logger instances share the lock

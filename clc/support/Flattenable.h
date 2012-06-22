@@ -30,7 +30,7 @@ public:
      *  @param len  The length of the buffer.
      */
     Flattener(char* buf, size_t len);
-    
+
     /**
      *  Sets the buffer that the Flattener will fill.
      *  @param buf  The buffer.

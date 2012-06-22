@@ -1,5 +1,3 @@
-#ifndef __HAIKU__
-
 #include <stdlib.h>
 #include <stdio.h>
 #if defined(__linux__)
@@ -8,6 +6,7 @@
 
 #include "clc/support/Debug.h"
 #include "clc/data/Buffer.h"
+
 
 namespace clc
 {
@@ -72,6 +71,4 @@ void Debugger::nameThread(const char* name)
 }
 
 }
-
-#endif
 

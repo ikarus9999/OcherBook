@@ -14,7 +14,7 @@ class Iterator
 {
 public:
     virtual ~Iterator() {}
-    
+
     /**
      *  @return true if the iteration has more elements.
      */
@@ -22,7 +22,7 @@ public:
     {
         return false;
     }
-    
+
     /**
      *  Returns the next element in the iteration (potentially yielding
      *  the Task to get it).

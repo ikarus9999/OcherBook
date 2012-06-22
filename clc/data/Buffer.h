@@ -254,11 +254,11 @@ public:
     /**
      *  Locks the buffer.  Buffer must be unlocked when done.
      *  (Or the object can be destroyed safely).
-     *  @return  A buffer which may be written directly to, up to maxLen chars.
+     *  @return  A buffer which may be written directly to, up to maxLength chars.
      */
     char*      lockBuffer(size_t maxLength);
     /**
-     *  @param length  The amount of the locked buffer that was filled.  Default (-1) implies
+     *  @param length  The amount of the locked buffer that was filled.  Default (0) implies
      *      using strlen to determine the length.
      */
     Buffer&    unlockBuffer(size_t length = 0);
@@ -496,20 +496,20 @@ operator!=(const char *str, const Buffer &string)
 
 class BufferRef {
 public:
-	BufferRef(Buffer& string, size_t position);
-	~BufferRef() {}
+    BufferRef(Buffer& string, size_t position);
+    ~BufferRef() {}
 
-	operator char() const;
+    operator char() const;
 
-	char* operator&();
-	const char* operator&() const;
+    char* operator&();
+    const char* operator&() const;
 
-	BufferRef& operator=(char c);
-	BufferRef& operator=(const BufferRef& rc);
+    BufferRef& operator=(char c);
+    BufferRef& operator=(const BufferRef& rc);
 
 private:
-	Buffer& fString;
-	size_t fPosition;
+    Buffer& fString;
+    size_t fPosition;
 };
 
 }

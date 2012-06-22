@@ -1214,7 +1214,7 @@ Buffer::IReplaceAll(char replaceThis, char withThis, size_t fromOffset)
     if (pos != NotFound) {
         fork();
         m_data[pos] = withThis;
-	while (1) {
+        while (1) {
             pos = _IFindAfter(tmp, pos, 1);
             if (pos == NotFound)
                 break;
