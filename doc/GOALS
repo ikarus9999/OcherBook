@@ -1,0 +1,43 @@
+Technology is hard to push back against.  Books are/will be moving to electronic.
+But what problems does that pose?
+    - privacy
+    - control
+    - accessibility
+    - reliability
+
+
+
+Privacy:
+    - All local, no cloud
+    - Open source
+    - No tracking / cloud / stats / etc
+
+Control:
+    - All local, no cloud
+    - Ability to import / export your reading record / notes / etc
+
+Accessibility:
+    - All local, no cloud
+    - multiple architectures
+    - multiple output devices
+    - low resource requirements / low power
+    - support new and old tech
+
+Reliability:
+    - books do not crash or hang
+
+
+
+How do we enjoy e-books without creating a new dark age?  (Consider DRM,
+technological obsolescence, peak oil, ...)
+    - discourage DRM
+    - support low power (Raspberry Pi?)
+    - support old tech
+    - archiving is still the user's problem...
+
+
+Primary real-world target is (currently, in order of focus) Kobo, desktop
+Linux, old tech.
+
+Windows is commonplace, but sucks.  Sigh.
+

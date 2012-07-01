@@ -1,7 +1,7 @@
 #include <string.h>
 #include <stddef.h>
 
-#include "clc/crypto/Hash.h"
+#include "clc/crypto/MurmurHash2.h"
 #include "clc/data/Hashtable.h"
 
 

@@ -11,7 +11,7 @@
 #define uint unsigned int
 #include <linux/mxcfb.h>
 
-#include "mx50/fb.h"
+#include "ocher/device/mx50/fb.h"
 
 
 Mx50Epdc::Mx50Epdc()

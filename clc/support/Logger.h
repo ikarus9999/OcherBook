@@ -92,7 +92,8 @@ public:
         Debug,
         Info,
         Warn,
-        Error
+        Error,
+        Fatal
     };
 
     /**
@@ -140,6 +141,10 @@ public:
      * @param name  Identifies the receiving Logger.
      */
     static void error(const char* name, const char* fmt, ...);
+    /**
+     * @param name  Identifies the receiving Logger.
+     */
+    static void fatal(const char* name, const char* fmt, ...);
 
 protected:
     static Loggers loggers;
@@ -251,6 +256,10 @@ public:
     /**
      */
     void error(const char* fmt, ...);
+
+    /**
+     */
+    void fatal(const char* fmt, ...);
 
 protected:
     /**
@@ -370,6 +379,26 @@ inline void Logger::error(const char* fmt, ...)
 #else
 inline void Log::error(const char*, const char*, ...) {}
 inline void Logger::error(const char*, ...) {}
+#endif
+
+#if defined(CLC_LOG_LEVEL) && CLC_LOG_LEVEL >= 0
+inline void Log::fatal(const char* name, const char* fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    log(name, Fatal, fmt, ap);
+    va_end(ap);
+}
+inline void Logger::fatal(const char* fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    log(clc::Log::Fatal, fmt, ap);
+    va_end(ap);
+}
+#else
+inline void Log::fatal(const char*, const char*, ...) {}
+inline void Logger::fatal(const char*, ...) {}
 #endif
 
 }

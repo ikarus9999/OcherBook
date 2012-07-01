@@ -13,6 +13,12 @@ help:
 	@echo "Target device"
 	@echo "*	TARGET=native	Compile natively for testing"
 	@echo "	TARGET=kobo	Compile for KoboTouch"
+	@echo ""
+	@echo "Targets:"
+	@echo "*	ocher"
+	@echo "	clean"
+	@echo "	test"
+
 
 
 #################### Common settings
@@ -36,9 +42,11 @@ BUILD_DIR=build
 ifeq ($(TARGET),native)
 	CC?=gcc
 	CXX?=g++
+	OCHER_UI_FD=1
 else
 	CC?=`pwd`/arm-2010q1/bin/arm-linux-gcc
 	CXX?=`pwd`/arm-2010q1/bin/arm-linux-g++
+	OCHER_UI_MX50=1
 endif
 
 
@@ -94,7 +102,7 @@ INCS+=-I$(MXML_DIR)
 
 #################### OcherBook
 
-CFLAGS=-I. -Iocherbook $(INCS) $(OCHER_CFLAGS) -DSINGLE_THREADED
+CFLAGS=-I. $(INCS) $(OCHER_CFLAGS) -DSINGLE_THREADED
 ifeq ($(DEBUG),1)
 	CFLAGS+=-DMT_LOG_LEVEL=5
 else
@@ -104,7 +112,7 @@ CFLAGS+=$(CFLAGS_COMMON)
 LD_FLAGS+=-lrt
 
 OCHER_OBJS = \
-	clc/crypto/Hash.o \
+	clc/crypto/MurmurHash2.o \
 	clc/data/Buffer.o \
 	clc/data/Hashtable.o \
 	clc/data/List.o \
@@ -113,25 +121,37 @@ OCHER_OBJS = \
 	clc/storage/Path.o \
 	clc/support/Debug.o \
 	clc/support/Logger.o \
-	ocherbook/Browse.o \
-	ocherbook/Epub.o \
-	ocherbook/Layout.o \
-	ocherbook/UnzipCache.o \
-	ocherbook/main.o \
+	ocher/device/Device.o \
+	ocher/fmt/epub/Epub.o \
+	ocher/fmt/epub/UnzipCache.o \
+	ocher/layout/Layout.o \
+	ocher/main.o \
+	ocher/ui/Browse.o \
+	ocher/ui/Controller.o \
 	$(ZLIB_OBJS)
 
 ifeq ($(TARGET),KoboTouch)
-	OCHER_OBJS += \
-		fb/mx50/fb.o
 	CFLAGS += \
 		-DTARGET_KOBO \
 		-DTARGET_KOBOTOUCH
 endif
-ifeq ($(TARGET),native)
+
+ifeq ($(OCHER_UI_MX50),1)
+	CFLAGS += -DOCHER_UI_MX50
 	OCHER_OBJS += \
-		fb/sdl/sdl-fb.o
-	CFLAGS += \
-		-DTARGET_NATIVE
+		ocher/fb/mx50/fb.o
+endif
+
+ifeq ($(OCHER_UI_FD),1)
+	CFLAGS += -DOCHER_UI_FD
+	OCHER_OBJS += \
+		ocher/ui/fd/BrowseFd.o \
+		ocher/ui/fd/FactoryFd.o
+endif
+
+ifeq ($(OCHER_UI_NCURSES),1)
+	CFLAGS += -DOCHER_UI_NCURSES
+	OCHER_OBJS += ui/ncurses/Browse.cpp
 endif
 
 #ODIR=obj
@@ -143,8 +163,12 @@ endif
 .cpp.o:
 	$(CXX) -c $(CFLAGS) $*.cpp -o $@
 
-ocher: $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB) $(OCHER_OBJS)
+ocher: $(BUILD_DIR)/ocher
+$(BUILD_DIR)/ocher: $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB) $(OCHER_OBJS)
 	$(CXX) $(LD_FLAGS) $(CFLAGS) -o $@ $(OCHER_OBJS) $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB)
 
 clean:
-	/bin/rm -f $(OCHER_OBJS) ocher
+	/bin/rm -f $(OCHER_OBJS) $(BUILD_DIR)/ocher
+
+test: ocher
+	# TODO

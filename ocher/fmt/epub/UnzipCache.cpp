@@ -2,7 +2,7 @@
 
 #include "clc/support/Logger.h"
 #include "clc/storage/Path.h"
-#include "UnzipCache.h"
+#include "ocher/fmt/epub/UnzipCache.h"
 
 
 UnzipCache::UnzipCache(const char *filename, const char *password) :

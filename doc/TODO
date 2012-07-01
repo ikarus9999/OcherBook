@@ -1,16 +1,44 @@
+0.0:
+- rough structure, research, dreaming
+
+0.1:
+- reliably output text and epub via fd UI
+- more application framework
+    - controller:  workflow (via fd)
+- more kobo research
+
+0.2:
+- paginate
+- output via ncurses UI
+- more kobo research
+
+0.3:
+- css
+
+0.4:
+- output via kobo mx50 UI
+    - fb
+    - freetype
+
+0.5:
+- settings
+- notes
+
+0.6:
+
+
+
+SDL
+
+per-user:
+    keep personal log of books read (title, author, date, notes, ...)?
+    ability to export per-use stats
+
+better Makefile
+
 move unzip stuff to libclc?
 
-CSS
-
-layout pages in memory
-paginate
-
-browser
-
-quick way to pull out metadata - fast enough to not need a database
-- dc:title
-
-SDL on x86
+quick way to pull out metadata - fast enough to not need a database like kobo?
 
 options to validate epubs?
 
@@ -19,13 +47,7 @@ valgrind across many epubs
 
 document complete walk-through of installing, recovery, etc
 
-
-fluffy features
----------------
-
 time / date / calendar view
-
-keep personal log of books read (title, author, date, ...)?
 
 wirelessly sync with epubs on home server
 

@@ -1,10 +1,9 @@
 #include "mxml.h"
 
-#include "Layout.h"
-#include "Epub.h"
-
+#include "ocher/layout/Layout.h"
+#include "ocher/fmt/epub/Epub.h"
 #ifdef TARGET_KOBOTOUCH
-#include "fb/mx50/fb.h"
+#include "ocher/fb/mx50/fb.h"
 Mx50Epdc e;
 #endif
 
@@ -197,21 +196,14 @@ void processSiblings(mxml_node_t *node, Epub *epub)
 }
 
 
-int render(clc::Buffer &html, Epub *epub)
+int render(mxml_node_t *tree, Epub *epub)
 {
-    //printf("%s\n", html.c_str());
-    mxml_node_t *tree = mxmlLoadString(NULL, html.c_str(), MXML_OPAQUE_CALLBACK);
-    if (!tree) {
-        return -1;
-    }
-
     mxml_node_t *body = mxmlFindPath(tree, "html/body");
     if (body) {
         // TODO:  huh? mxmlFindPath seems to return the child.  Ok, so processSiblings.
         processSiblings(body, epub);
     }
 
-    mxmlDelete(tree);
     return 0;
 }
 
