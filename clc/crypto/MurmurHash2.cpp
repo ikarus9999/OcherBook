@@ -1,4 +1,4 @@
-#include "clc/crypto/Hash.h"
+#include "clc/crypto/MurmurHash2.h"
 
 namespace clc
 {

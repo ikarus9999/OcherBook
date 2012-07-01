@@ -1,11 +1,24 @@
 #ifndef LIBCLC_HASH_H
 #define LIBCLC_HASH_H
 
+/** @file
+ *  Murmur2 hash
+ */
+
 #include <stdint.h>
+
+//#include "clc/crypto/Digest.h"
 
 
 namespace clc
 {
+
+//class Murmur2 : public Digest
+//{
+//public:
+//    Murmur2();
+//
+//};
 
 /**
  *  Hashes a chunk of data.
