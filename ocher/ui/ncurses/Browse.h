@@ -12,7 +12,7 @@
 class BrowseCurses : public Browse, clc::Window
 {
 public:
-    BrowseCurses();
+    BrowseCurses(clc::Tui &tui);
 
     void repaint();
 };

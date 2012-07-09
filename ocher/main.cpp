@@ -43,7 +43,7 @@ void initLog()
 void usage(const char *msg)
 {
     printf(
-        "OcherBook  Copyright (C) 2012 Chuck Coffing\n"
+        "OcherBook  Copyright (C) 2012 Chuck Coffing  <clc@alum.mit.edu>\n"
         "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
         "\n");
     if (msg) {
@@ -65,18 +65,24 @@ void usage(const char *msg)
     exit(0);
 }
 
+#define OPT_DRIVER 256
+#define OPT_LIST_DRIVERS 257
+
 int main(int argc, char **argv)
 {
     clc::List drivers;
+    bool listDrivers = false;
 
     struct option long_options[] =
     {
-        {"directory",   required_argument,    0,   'd'},
-        {"flatten",     no_argument,          0,   'f'},
-        {"help",        no_argument,          0,   'h'},
-        {"quiet",       no_argument,          0,   'q'},
-        {"test",        no_argument,          0,   't'},
-        {"verbose",     no_argument,          0,   'v'},
+        {"directory",    required_argument, 0,'d'},
+        {"flatten",      no_argument,       0,'f'},
+        {"help",         no_argument,       0,'h'},
+        {"quiet",        no_argument,       0,'q'},
+        {"test",         no_argument,       0,'t'},
+        {"verbose",      no_argument,       0,'v'},
+        {"driver",       required_argument, 0, OPT_DRIVER},
+        {"list-drivers", no_argument,       0, OPT_LIST_DRIVERS},
         {0, 0, 0, 0}
     };
 
@@ -102,6 +108,12 @@ int main(int argc, char **argv)
             case 'h':
                 usage(0);
                 break;
+            case OPT_DRIVER:
+                opt.driverName = optarg;
+                break;
+            case OPT_LIST_DRIVERS:
+                listDrivers = true;
+                break;
             default:
                 usage("Unknown argument");
                 break;
@@ -119,16 +131,12 @@ int main(int argc, char **argv)
 #ifdef OCHER_UI_FD
     drivers.add(new UiFactoryFd(opt.inFd, opt.outFd));
 #endif
-    if (opt.listDrivers) {
-        // TODO
-        return 0;
-    }
 
     UiFactory *driver = 0;
     for (unsigned int i = 0; i < drivers.size(); ++i) {
         UiFactory *factory = (UiFactory*)drivers.get(i);
 
-        if (opt.listDrivers) {
+        if (listDrivers) {
             printf("\t%s\n", factory->getName());
         } else if (opt.driverName) {
             if (strcmp(factory->getName(), opt.driverName) == 0) {
@@ -145,6 +153,9 @@ int main(int argc, char **argv)
             }
         }
     }
+    if (listDrivers) {
+        return 0;
+    }
     if (! driver) {
         printf("No suitable output driver found\n");
         return 1;
@@ -155,8 +166,9 @@ int main(int argc, char **argv)
         opt.file = argv[optind++];
     }
 
-    if (!opt.file && !opt.dir)
+    if (!opt.file && !opt.dir) {
         usage("Please specify an epub file or directory.");
+    }
 
     Controller c(driver);
     c.run();

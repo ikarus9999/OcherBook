@@ -1,4 +1,5 @@
-OcherBook is an open-source firmware replacement for the Kobo Touch e-reader.
+OcherBook is an open-source ebook reader, supporting multiple file
+formats and output devices.
 
 To get started, look in the doc directory, and/or "make help".
 

@@ -16,6 +16,7 @@ help:
 	@echo ""
 	@echo "Targets:"
 	@echo "*	ocher"
+	@echo "	doc"
 	@echo "	clean"
 	@echo "	test"
 
@@ -124,10 +125,15 @@ OCHER_OBJS = \
 	ocher/device/Device.o \
 	ocher/fmt/epub/Epub.o \
 	ocher/fmt/epub/UnzipCache.o \
+	ocher/fmt/epub/LayoutEpub.o \
+	ocher/fmt/text/Text.o \
+	ocher/fmt/text/LayoutText.o \
+	ocher/fmt/Meta.o \
 	ocher/layout/Layout.o \
 	ocher/main.o \
 	ocher/ui/Browse.o \
 	ocher/ui/Controller.o \
+	ocher/ui/Renderer.o \
 	$(ZLIB_OBJS)
 
 ifeq ($(TARGET),KoboTouch)
@@ -146,12 +152,16 @@ ifeq ($(OCHER_UI_FD),1)
 	CFLAGS += -DOCHER_UI_FD
 	OCHER_OBJS += \
 		ocher/ui/fd/BrowseFd.o \
+		ocher/ui/fd/RenderFd.o \
 		ocher/ui/fd/FactoryFd.o
 endif
 
 ifeq ($(OCHER_UI_NCURSES),1)
 	CFLAGS += -DOCHER_UI_NCURSES
-	OCHER_OBJS += ui/ncurses/Browse.cpp
+	OCHER_OBJS += \
+		ocher/ui/ncurses/Browse.o \
+		ocher/ui/ncurses/Render.o \
+		ocher/ui/ncurses/Factory.o
 endif
 
 #ODIR=obj
@@ -172,3 +182,8 @@ clean:
 
 test: ocher
 	# TODO
+
+.PHONY: doc
+
+doc:
+	cd ocher && doxygen ../doc/Doxyfile

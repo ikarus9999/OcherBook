@@ -10,10 +10,11 @@ But what problems does that pose?
 Privacy:
     - All local, no cloud
     - Open source
-    - No tracking / cloud / stats / etc
+    - No tracking / cloud / FB integration / etc
 
 Control:
     - All local, no cloud
+    - no DRM
     - Ability to import / export your reading record / notes / etc
 
 Accessibility:
@@ -34,10 +35,4 @@ technological obsolescence, peak oil, ...)
     - support low power (Raspberry Pi?)
     - support old tech
     - archiving is still the user's problem...
-
-
-Primary real-world target is (currently, in order of focus) Kobo, desktop
-Linux, old tech.
-
-Windows is commonplace, but sucks.  Sigh.
 

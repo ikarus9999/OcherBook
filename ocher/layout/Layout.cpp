@@ -1,210 +1,104 @@
-#include "mxml.h"
+#include <ctype.h>
 
 #include "ocher/layout/Layout.h"
-#include "ocher/fmt/epub/Epub.h"
-#ifdef TARGET_KOBOTOUCH
-#include "ocher/fb/mx50/fb.h"
-Mx50Epdc e;
-#endif
 
-class Attrs {
-public:
-    Attrs() : ul(0), b(0), em(0), pre(0), ws(0), nl(0), pts(12) {}
-    int ul;
-    int b;
-    int em;
-    int pre;
-    int ws;
-    int nl;
-    int pts;   ///< text points
-    // TODO text size, ...
-};
 
-Attrs a[10];
-int ai = 1;
-
-void pushAttrs(mxml_node_t *node)
+Layout::Layout() :
+    m_dataLen(0),
+    nl(0),
+    ws(0),
+    pre(0),
+    m_text(new clc::Buffer)
 {
-    a[ai+1] = a[ai];
-    ai++;
+    m_data.lockBuffer(chunk);
 }
 
-void enableUl()
+Layout::~Layout()
 {
-    printf("\x1b[4m");
 }
 
-void disableUl()
+clc::Buffer Layout::unlock()
 {
-    printf("\x1b[24m");
+    m_data.unlockBuffer(m_dataLen);
+    return m_data;
 }
 
-void enableEm()
+char *Layout::checkAlloc(unsigned int n)
 {
-    printf("\x1b[1m");
-}
-
-void disableEm()
-{
-    printf("\x1b[22m");
-}
-
-void applyAttrs(int i)
-{
-    if (a[ai].ul && !a[ai-i].ul) {
-        enableUl();
-    } else if (!a[ai].ul && a[ai-i].ul) {
-        disableUl();
+    if (m_dataLen + n > m_data.size()) {
+        m_data.unlockBuffer(m_data.size());
+        m_data.lockBuffer(m_dataLen + n + chunk);
     }
-
-    if (a[ai].em && !a[ai-i].em) {
-        enableEm();
-    } else if (!a[ai].em && a[ai-i].em) {
-        disableEm();
-    }
+    char *p = m_data.c_str() + m_dataLen;
+    m_dataLen += n;
+    return p;
 }
 
-void popAttrs()
+void Layout::push(unsigned int opType, unsigned int op, unsigned int arg)
 {
-    ai--;
-    applyAttrs(-1);
+    char *p = checkAlloc(2);
+    uint16_t i = (opType<<12) | (op<<8) | arg;
+    p[0] = (i>>8)&0xff;
+    p[1] = (i   )&0xff;
 }
 
-void outputChar(char c)
+void Layout::pushPtr(void *ptr)
 {
-    a[ai].nl = 0;
+    int n = sizeof(ptr);
+    char *p = checkAlloc(n);
+    *((char**)p) = (char*)ptr;
+}
+
+void Layout::pushTextAttr(TextAttr attr, uint8_t arg)
+{
+    push(OpPushTextAttr, attr, arg);
+}
+
+void Layout::popTextAttr(unsigned int n)
+{
+    push(OpCmd, CmdPopAttr, n);
+}
+
+void Layout::pushLineAttr(LineAttr attr, uint8_t arg)
+{
+    push(OpPushLineAttr, attr, arg);
+}
+
+void Layout::popLineAttr(unsigned int n)
+{
+    push(OpCmd, CmdPopAttr, n);
+}
+
+void Layout::outputChar(char c)
+{
+    nl = 0;
     if (isspace(c)) {
-        if (! a[ai].ws) {
-            a[ai].ws = 1;
-            putc(' ', stdout);
+        if (! ws) {
+            ws = 1;
+            m_text->append(' ', 1);
         }
     } else {
-        a[ai].ws = 0;
-        putc(c, stdout);
+        ws = 0;
+        m_text->append(c, 1);
     }
 }
 
-void outputNode(mxml_node_t *node)
+void Layout::outputNl()
 {
-    if (node->type == MXML_OPAQUE) {
-        //printf("%s ", node->value.opaque);
-        for (char *p = node->value.opaque; *p; ++p) {
-            outputChar(*p);
-        }
+    if (! nl) {
+        nl = 1;
+        m_text->append('\n', 1);
     }
 }
 
-void outputNl()
+void Layout::outputBr()
 {
-    if (! a[ai].nl) {
-        a[ai].nl = 1;
-        putc('\n', stdout);
-    }
+    m_text->append('\n', 1);
 }
 
-void outputBr()
+void Layout::flushText()
 {
-    putc('\n', stdout);
+    push(OpCmd, CmdOutputStr, 0);
+    pushPtr(m_text);
 }
-
-void processSiblings(mxml_node_t *node, Epub *epub);
-
-//typedef void (*PreHtmlFunc)(const char *name, mxml_node_t *node);
-//typedef void (*PostHtmlFunc)(mxml_node_t *node);
-//
-//
-//struct HtmlTag {
-//    const char *name;
-//    PreHtmlFunc pre;
-//    PostHtmlFunc post;
-//};
-
-void processNode(mxml_node_t *node, Epub *epub)
-{
-    if (node->type == MXML_ELEMENT) {
-        const char *name = node->value.element.name;
-//        printf(">>%s<<", name);
-        if (strcasecmp(name, "div") == 0) {
-            pushAttrs(node);
-            processSiblings(node->child, epub);
-            popAttrs();
-            outputChar(' '); // TODO: temp until CSS
-        } else if (strcasecmp(name, "title") == 0) {
-
-        } else if (strcasecmp(name, "link") == 0) {
-            // load CSS
-            const char *type = mxmlElementGetAttr(node, "type");
-            if (type && strcmp(type, "text/css") == 0) {
-                const char *href = mxmlElementGetAttr(node, "hrev");
-                if (href) {
-                    clc::Buffer css;
-                    TreeFile *f = epub->getFile(href, css);
-                    // TODO: parse CSS
-
-                }
-            }
-        } else if (strcasecmp(name, "p") == 0) {
-            pushAttrs(node);
-            outputNl();
-            applyAttrs(1);
-            processSiblings(node->child, epub);
-            popAttrs();
-            outputBr();
-            outputBr();
-        } else if (strcasecmp(name, "br") == 0) {
-            outputBr();
-        } else if ((name[0] == 'h' || name[0] == 'H') && isdigit(name[1]) && !name[2]) {
-            pushAttrs(node);
-            // TODO text size, ...
-            outputNl();
-            applyAttrs(1);
-            processSiblings(node->child, epub);
-            popAttrs();
-            outputBr();
-        } else if (strcasecmp(name, "b") == 0) {
-            pushAttrs(node);
-            a[ai].b = 1;
-            applyAttrs(1);
-            processSiblings(node->child, epub);
-            popAttrs();
-        } else if (strcasecmp(name, "ul") == 0) {
-            pushAttrs(node);
-            a[ai].ul = 1;
-            applyAttrs(1);
-            processSiblings(node->child, epub);
-            popAttrs();
-        } else if (strcasecmp(name, "em") == 0) {
-            pushAttrs(node);
-            a[ai].em = 1;
-            applyAttrs(1);
-            processSiblings(node->child, epub);
-            popAttrs();
-        } else {
-            processSiblings(node->child, epub);
-        }
-
-    } else if (node->type == MXML_OPAQUE) {
-        outputNode(node);
-    }
-}
-
-void processSiblings(mxml_node_t *node, Epub *epub)
-{
-    for ( ; node; node = mxmlGetNextSibling(node)) {
-        processNode(node, epub);
-    }
-}
-
-
-int render(mxml_node_t *tree, Epub *epub)
-{
-    mxml_node_t *body = mxmlFindPath(tree, "html/body");
-    if (body) {
-        // TODO:  huh? mxmlFindPath seems to return the child.  Ok, so processSiblings.
-        processSiblings(body, epub);
-    }
-
-    return 0;
-}
-
 

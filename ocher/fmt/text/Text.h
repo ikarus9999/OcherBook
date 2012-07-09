@@ -3,11 +3,13 @@
 
 #include "ocher/fmt/Format.h"
 
-class TextFmt : public Format
+
+class Text : public Format
 {
 public:
-    TextFmt(const char *filename);
+    Text(const char *filename);
 
+    clc::Buffer getFormatName();
 };
 
 #endif

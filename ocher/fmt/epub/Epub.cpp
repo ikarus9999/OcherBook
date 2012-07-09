@@ -8,7 +8,7 @@
 #include "ocher/fmt/epub/Epub.h"
 
 
-clc::Buffer getFormatName() {
+clc::Buffer Epub::getFormatName() {
     static clc::Buffer name("EPUB");
     return name;
 }

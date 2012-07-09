@@ -1,5 +1,6 @@
 #include "clc/tui/Tui.h"
-#include "ui/curses/Browse.h"
+#include "ocher/ui/ncurses/Browse.h"
+
 
 BrowseCurses::BrowseCurses(clc::Tui &tui) :
     clc::Window(tui.mainWindow())

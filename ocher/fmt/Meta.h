@@ -2,7 +2,6 @@
 #define OCHER_META_H
 
 #include "clc/data/Buffer.h"
-#include "clc/data/Uuid.h"
 
 class Meta
 {

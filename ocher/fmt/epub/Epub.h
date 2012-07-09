@@ -6,6 +6,7 @@
 
 #include "clc/data/Buffer.h"
 
+#include "ocher/fmt/Format.h"
 #include "ocher/fmt/epub/UnzipCache.h"
 
 
@@ -15,7 +16,7 @@ struct EpubItem
     clc::Buffer mediaType;
 };
 
-class Epub
+class Epub : public Format
 {
 public:
     Epub(const char* epubFilename, const char *password=0);
