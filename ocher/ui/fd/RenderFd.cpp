@@ -16,26 +16,27 @@ RendererFd::RendererFd(clc::Buffer layout, int fd) :
     m_page(1),
     ai(1)
 {
+    clc::Log::info("ocher", "RendererFd %d bytes", layout.size());
 }
 
 void RendererFd::enableUl()
 {
-    write(m_fd, "\x1b[4m", 4);
+    write(m_fd, "\x1b[4m", 5);
 }
 
 void RendererFd::disableUl()
 {
-    write(m_fd, "\x1b[24m", 5);
+    write(m_fd, "\x1b[24m", 6);
 }
 
 void RendererFd::enableEm()
 {
-    write(m_fd, "\x1b[1m", 4);
+    write(m_fd, "\x1b[1m", 5);
 }
 
 void RendererFd::disableEm()
 {
-    write(m_fd, "\x1b[22m", 5);
+    write(m_fd, "\x1b[22m", 6);
 }
 
 void RendererFd::pushAttrs()
@@ -83,6 +84,7 @@ void RendererFd::render(unsigned int offset, unsigned int pageNum)
         unsigned int arg = code & 0xff;
         switch (opType) {
             case Layout::OpPushTextAttr:
+                clc::Log::debug("ocher.renderer.fd", "OpPushTextAttr");
                 switch (op) {
                     case Layout::AttrBold:
                         pushAttrs();
@@ -104,10 +106,13 @@ void RendererFd::render(unsigned int offset, unsigned int pageNum)
                     case Layout::AttrSizeAbs:
                         break;
                     default:
+                        clc::Log::error("ocher.renderer.fd", "unknown OpPushTextAttr");
+                        ASSERT(0);
                         break;
                 }
                 break;
             case Layout::OpPushLineAttr:
+                clc::Log::debug("ocher.renderer.fd", "OpPushLineAttr");
                 switch (op) {
                     case Layout::LineJustifyLeft:
                         break;
@@ -118,27 +123,34 @@ void RendererFd::render(unsigned int offset, unsigned int pageNum)
                     case Layout::LineJustifyRight:
                         break;
                     default:
+                        clc::Log::error("ocher.renderer.fd", "unknown OpPushLineAttr");
+                        ASSERT(0);
                         break;
                 }
                 break;
             case Layout::OpCmd:
                 switch (op) {
                     case Layout::CmdPopAttr:
+                        clc::Log::debug("ocher.renderer.fd", "OpCmd CmdPopAttr");
                         if (arg == 0)
                             arg = 1;
                         while (arg--)
                             popAttrs();
                         break;
                     case Layout::CmdOutputStr: {
+                        clc::Log::debug("ocher.renderer.fd", "OpCmd CmdOutputStr");
                         ASSERT(i + sizeof(clc::Buffer*) <= N);
-                        clc::Buffer *str = (clc::Buffer*)(raw+i);
+                        clc::Buffer *str = *(clc::Buffer**)(raw+i);
                         i += sizeof(clc::Buffer*);
-                        printf("%s", str->data());
+                        write(m_fd, str->data(), str->size());
                         break;
                     }
                     case Layout::CmdForcePage:
+                        clc::Log::debug("ocher.renderer.fd", "OpCmd CmdForcePage");
                         break;
                     default:
+                        clc::Log::error("ocher.renderer.fd", "unknown OpCmd");
+                        ASSERT(0);
                         break;
                 }
                 break;
@@ -147,6 +159,8 @@ void RendererFd::render(unsigned int offset, unsigned int pageNum)
             case Layout::OpImage:
                 break;
             default:
+                clc::Log::error("ocher.renderer.fd", "unknown op type");
+                ASSERT(0);
                 break;
 
         };

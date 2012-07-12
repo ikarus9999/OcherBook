@@ -1,5 +1,5 @@
-#ifndef LIBCLC_DATA_BUFFER_H
-#define LIBCLC_DATA_BUFFER_H
+#ifndef LIBCLC_BUFFER_H
+#define LIBCLC_BUFFER_H
 
 #include <string.h>
 #include <stdarg.h>
@@ -21,7 +21,7 @@ class BufferRef;
  *      Buffers are intended to be shared among threads, either external locking must be used,
  *      or all threads must treat the Buffer as read-only, or after a thread gives a copy of the
  *      Buffer to another thread which may mutate it, the giving thread can only safely destroy
- *      its object but not dereference it.  If threading is not used, compile with NTHREADS
+ *      its object but not dereference it.  If threading is not used, compile with SINGLE_THREADED.
  *  @todo  Where possible, make compatible with std::string
  *  @todo  fork vs _DetachWith  (fork is used in some places _DetachWith would be
  *          better; _DetachWith has dead code path; possibly combine?)

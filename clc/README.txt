@@ -4,13 +4,11 @@ to support my projects.  It is intended to be:
  - minimal use of STL, for size concerns
  - correct (high unit test coverage)
  - well documented
- - portable to POSIX-like systems
+ - portable to POSIX-like systems (WIN32 on an as-needed basis, but not to the
+   point that it interferes with clean coding)
  - examples of what I consider "best practice" (subject to evolution!)
  - minimal configuration, for easy cherry-picking of files into other projects
  - static linking, for easy drop-in to other projects
-
-Windows sucks and requires too many contortions to support, so any WIN32 support
-was likely added in a moment of weakness and subject to be removed at any moment.
 
 
 BUILDING

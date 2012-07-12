@@ -1,5 +1,5 @@
-#ifndef LIBCLC_SUPPORT_LOG_APPENDER_FILE_H
-#define LIBCLC_SUPPORT_LOG_APPENDER_FILE_H
+#ifndef LIBCLC_LOG_APPENDER_FILE_H
+#define LIBCLC_LOG_APPENDER_FILE_H
 
 #include "clc/storage/File.h"
 #include "clc/support/LogAppenders.h"

@@ -10,6 +10,8 @@ public:
     Text(const char *filename);
 
     clc::Buffer getFormatName();
+
+    clc::Buffer m_text;
 };
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef LIBCLC_SUPPORT_LOGGER_H
-#define LIBCLC_SUPPORT_LOGGER_H
+#ifndef LIBCLC_LOGGER_H
+#define LIBCLC_LOGGER_H
 
 #include "clc/data/Buffer.h"
 #include "clc/data/Hashtable.h"

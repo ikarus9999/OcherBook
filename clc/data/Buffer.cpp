@@ -8,7 +8,7 @@
 
 #include "clc/data/Buffer.h"
 #include "clc/support/Debug.h"
-#ifndef NTHREADS
+#ifndef SINGLE_THREADED
 #include "clc/os/Atomic.h"
 #endif
 
@@ -78,7 +78,7 @@ Buffer::refCount() const
 
 inline int32_t Buffer::incRef()
 {
-#ifdef NTHREADS
+#ifdef SINGLE_THREADED
     return ++refCount();
 #else
     return atomicAdd(&refCount(), 1) + 1;
@@ -87,7 +87,7 @@ inline int32_t Buffer::incRef()
 
 inline int32_t Buffer::decRef()
 {
-#ifdef NTHREADS
+#ifdef SINGLE_THREADED
     return --refCount();
 #else
     return atomicAdd(&refCount(), -1) - 1;

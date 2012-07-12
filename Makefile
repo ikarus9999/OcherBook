@@ -105,20 +105,23 @@ INCS+=-I$(MXML_DIR)
 
 CFLAGS=-I. $(INCS) $(OCHER_CFLAGS) -DSINGLE_THREADED
 ifeq ($(DEBUG),1)
-	CFLAGS+=-DMT_LOG_LEVEL=5
+	CFLAGS+=-DCLC_LOG_LEVEL=5
 else
-	CFLAGS+=-DMT_LOG_LEVEL=2
+	CFLAGS+=-DCLC_LOG_LEVEL=2
 endif
 CFLAGS+=$(CFLAGS_COMMON)
 LD_FLAGS+=-lrt
 
 OCHER_OBJS = \
+	clc/algorithm/Random.o \
 	clc/crypto/MurmurHash2.o \
 	clc/data/Buffer.o \
 	clc/data/Hashtable.o \
 	clc/data/List.o \
 	clc/data/Set.o \
 	clc/os/Clock.o \
+	clc/os/Lock.o \
+	clc/storage/File.o \
 	clc/storage/Path.o \
 	clc/support/Debug.o \
 	clc/support/Logger.o \

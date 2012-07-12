@@ -1,5 +1,5 @@
-#ifndef LIBCLC_OS_ATOMIC_H
-#define LIBCLC_OS_ATOMIC_H
+#ifndef LIBCLC_ATOMIC_H
+#define LIBCLC_ATOMIC_H
 
 /** @file
  *  Atomic operations.  Unless specified otherwise by "NoBarrier" in the name, these operations

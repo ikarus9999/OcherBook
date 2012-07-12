@@ -1,5 +1,7 @@
 #include "mxml.h"
 
+#include "clc/support/Logger.h"
+
 #include "ocher/fmt/epub/Epub.h"
 #include "ocher/fmt/epub/LayoutEpub.h"
 #include "ocher/fmt/epub/TreeMem.h"
@@ -14,7 +16,7 @@ void LayoutEpub::processNode(mxml_node_t *node)
 {
     if (node->type == MXML_ELEMENT) {
         const char *name = node->value.element.name;
-//        printf(">>%s<<", name);
+        clc::Log::trace("ocher.fmt.epub.layout", "found element '%s'", name);
         if (strcasecmp(name, "div") == 0) {
 //            pushAttrs(node);
             processSiblings(node->child);
@@ -68,9 +70,11 @@ void LayoutEpub::processNode(mxml_node_t *node)
             processSiblings(node->child);
         }
     } else if (node->type == MXML_OPAQUE) {
+        clc::Log::trace("ocher.fmt.epub.layout", "found opaque");
         for (char *p = node->value.opaque; *p; ++p) {
             outputChar(*p);
         }
+        flushText();
     }
 }
 

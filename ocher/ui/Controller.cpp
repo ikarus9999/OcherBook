@@ -1,5 +1,6 @@
 #include "mxml.h"
 
+#include "clc/storage/File.h"
 #include "clc/support/Logger.h"
 
 #include "ocher/ui/Browse.h"
@@ -9,6 +10,8 @@
 // TODO:  replace all this hardcoded stuff with factory:
 #include "ocher/fmt/epub/Epub.h"
 #include "ocher/fmt/epub/LayoutEpub.h"
+#include "ocher/fmt/text/Text.h"
+#include "ocher/fmt/text/LayoutText.h"
 #include "ocher/ui/fd/RenderFd.h"
 
 
@@ -25,26 +28,37 @@ void Controller::run()
 
     browser.browse();
 
+    clc::Buffer memLayout;
+
     // TODO:  probe file type
-    Epub epub(opt.file);
-    LayoutEpub layout(&epub);
+    // TODO:  complete hardcoded hack to test with here...
+    clc::File f(opt.file);
+    char buf[2];
+    if (f.read(buf, 2) != 2 || buf[0] != 'P' || buf[1] != 'K') {
+        Text text(opt.file);
+        LayoutText layout(&text);
+        clc::Log::info("ocher", "Loading %s: %s", text.getFormatName().c_str(), opt.file);
+        memLayout = layout.unlock();
+    } else {
+        Epub epub(opt.file);
+        LayoutEpub layout(&epub);
 
-    clc::Log::info("ocher", "Loading %s: %s", epub.getFormatName().c_str(), opt.file);
+        clc::Log::info("ocher", "Loading %s: %s", epub.getFormatName().c_str(), opt.file);
 
-    clc::Buffer html;
-    for (int i = 0; ; i++) {
-        if (epub.getSpineItemByIndex(i, html) != 0)
-            break;
-        mxml_node_t *tree = epub.parseXml(html);
-        if (tree) {
-            layout.append(tree);
-            mxmlDelete(tree);
+        clc::Buffer html;
+        for (int i = 0; ; i++) {
+            if (epub.getSpineItemByIndex(i, html) != 0)
+                break;
+            mxml_node_t *tree = epub.parseXml(html);
+            if (tree) {
+                layout.append(tree);
+                mxmlDelete(tree);
+            }
         }
+        memLayout = layout.unlock();
     }
 
-    RendererFd r(layout.unlock(), 1);
+    RendererFd r(memLayout, 1);
     r.render(0, 1);
-
-
 }
 

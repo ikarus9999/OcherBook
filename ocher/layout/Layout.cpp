@@ -1,5 +1,8 @@
 #include <ctype.h>
 
+#include "clc/support/Debug.h"
+#include "clc/support/Logger.h"
+
 #include "ocher/layout/Layout.h"
 
 
@@ -15,6 +18,8 @@ Layout::Layout() :
 
 Layout::~Layout()
 {
+    // TODO:  walk m_text and release embedded strings?
+    delete m_text;
 }
 
 clc::Buffer Layout::unlock()
@@ -38,8 +43,7 @@ void Layout::push(unsigned int opType, unsigned int op, unsigned int arg)
 {
     char *p = checkAlloc(2);
     uint16_t i = (opType<<12) | (op<<8) | arg;
-    p[0] = (i>>8)&0xff;
-    p[1] = (i   )&0xff;
+    *(uint16_t*)p = i;
 }
 
 void Layout::pushPtr(void *ptr)
@@ -71,6 +75,7 @@ void Layout::popLineAttr(unsigned int n)
 
 void Layout::outputChar(char c)
 {
+    // TODO:  lock large chunks of m_text for efficiency; limit size and flush
     nl = 0;
     if (isspace(c)) {
         if (! ws) {
@@ -100,5 +105,7 @@ void Layout::flushText()
 {
     push(OpCmd, CmdOutputStr, 0);
     pushPtr(m_text);
+    // m_text pointer is now owned by the layout bytecode.
+    m_text = new clc::Buffer;
 }
 

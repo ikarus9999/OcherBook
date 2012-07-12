@@ -1,5 +1,5 @@
-#ifndef LIBCLC_DATA_LIST_H
-#define LIBCLC_DATA_LIST_H
+#ifndef LIBCLC_LIST_H
+#define LIBCLC_LIST_H
 
 /** @file
  *  Light-weight list of pointers.

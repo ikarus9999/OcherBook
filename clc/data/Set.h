@@ -1,5 +1,5 @@
-#ifndef LIBCLC_DATA_SET_H
-#define LIBCLC_DATA_SET_H
+#ifndef LIBCLC_SET_H
+#define LIBCLC_SET_H
 
 #include "clc/support/Debug.h"
 #include "clc/data/Iterator.h"

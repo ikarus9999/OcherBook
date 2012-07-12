@@ -1,5 +1,5 @@
-#ifndef LIBCLC_DATA_HASHTABLE_H
-#define LIBCLC_DATA_HASHTABLE_H
+#ifndef LIBCLC_HASHTABLE_H
+#define LIBCLC_HASHTABLE_H
 
 #include <stdint.h>
 
