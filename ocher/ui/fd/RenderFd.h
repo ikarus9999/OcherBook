@@ -10,8 +10,14 @@ public:
 
     void render(unsigned int offset, unsigned int pageNum);
 
+    void setWidth(int width);
+    void outputWrapped(clc::Buffer *b);
+
 protected:
     int m_fd;
+    int m_width;
+    int m_x;
+    int m_y;
     int m_page;
 
     void enableUl();

@@ -76,13 +76,13 @@ void Layout::popLineAttr(unsigned int n)
 void Layout::outputChar(char c)
 {
     // TODO:  lock large chunks of m_text for efficiency; limit size and flush
-    nl = 0;
     if (isspace(c)) {
         if (! ws) {
             ws = 1;
             m_text->append(' ', 1);
         }
     } else {
+        nl = 0;
         ws = 0;
         m_text->append(c, 1);
     }
@@ -91,14 +91,15 @@ void Layout::outputChar(char c)
 void Layout::outputNl()
 {
     if (! nl) {
-        nl = 1;
         m_text->append('\n', 1);
+        nl = 1;
     }
 }
 
 void Layout::outputBr()
 {
     m_text->append('\n', 1);
+    nl = 1;
 }
 
 void Layout::flushText()

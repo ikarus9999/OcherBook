@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <stdint.h>
+#include <ctype.h>
 
 #include "clc/support/Debug.h"
 #include "clc/support/Logger.h"
@@ -13,10 +14,18 @@
 RendererFd::RendererFd(clc::Buffer layout, int fd) :
     Renderer(layout),
     m_fd(fd),
+    m_width(72),
+    m_x(0),
+    m_y(0),
     m_page(1),
     ai(1)
 {
     clc::Log::info("ocher", "RendererFd %d bytes", layout.size());
+}
+
+void RendererFd::setWidth(int width)
+{
+    m_width = width;
 }
 
 void RendererFd::enableUl()
@@ -65,6 +74,63 @@ void RendererFd::popAttrs()
     ai--;
     applyAttrs(-1);
 }
+
+void RendererFd::outputWrapped(clc::Buffer *b)
+{
+    if (m_width <= 0) {
+        write(m_fd, b->data(), b->size());
+        return;
+    }
+    
+    int len = b->size();
+    const char *p = b->data();
+
+    do {
+        int w = m_width - m_x;
+
+        // If at start of line, eat spaces
+        if (m_x == 0) {
+            while (*p != '\n' && isspace(*p)) {
+                ++p;
+                --len;
+            }
+        }
+
+        // How many chars should go out on this line?
+        const char *nl = 0;
+        int n = w;
+        if (w >= len) {
+            n = len;
+            nl = (const char *)memchr(p, '\n', n);
+        } else {
+            nl = (const char *)memchr(p, '\n', n);
+            if (!nl) {
+                // don't break words
+                if (!isspace(*(p+n-1)) && !isspace(*(p+n))) {
+                    char *space = (char*)memrchr(p, ' ', n);
+                    if (space) {
+                        nl = space;
+                    }
+                }
+            }
+        }
+        if (nl)
+            n = nl - p;
+
+        write(m_fd, p, n);
+        p += n;
+        len -= n;
+        m_x += n;
+        if (nl || m_x >= m_width-1) {
+            write(m_fd, "\n\n", 1);
+            m_x = 0;
+            m_y++;
+            p++;
+            len--;
+        }
+    } while (len > 0);
+}
+
 
 void RendererFd::render(unsigned int offset, unsigned int pageNum)
 {
@@ -142,7 +208,7 @@ void RendererFd::render(unsigned int offset, unsigned int pageNum)
                         ASSERT(i + sizeof(clc::Buffer*) <= N);
                         clc::Buffer *str = *(clc::Buffer**)(raw+i);
                         i += sizeof(clc::Buffer*);
-                        write(m_fd, str->data(), str->size());
+                        outputWrapped(str);
                         break;
                     }
                     case Layout::CmdForcePage:
