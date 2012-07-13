@@ -1,8 +1,12 @@
 #################### Tuneables
 
+OCHER_MAJOR?=0
+OCHER_MINOR?=0
+OCHER_PATCH?=7
+
 default: ocher
 
-TARGET?=kobo
+TARGET?=native
 
 help:
 	@echo "Environment variables:"
@@ -15,10 +19,11 @@ help:
 	@echo "	TARGET=kobo	Compile for KoboTouch"
 	@echo ""
 	@echo "Targets:"
-	@echo "*	ocher"
-	@echo "	doc"
-	@echo "	clean"
-	@echo "	test"
+	@echo "	clean	Clean"
+	@echo "*	ocher	Build the e-reader software"
+	@echo "	test	Unit tests"
+	@echo "	doc	Run Doxygen"
+	@echo "	dist	Build distribution packages"
 
 
 
@@ -35,7 +40,7 @@ endif
 CFLAGS_COMMON:=$(CFLAGS)
 
 # Additional CFLAGS for ocher (more picky than 3rd party libs)
-OCHER_CFLAGS?=-W -Wall
+OCHER_CFLAGS?=-W -Wall -DOCHER_MAJOR=$(OCHER_MAJOR) -DOCHER_MINOR=$(OCHER_MINOR) -DOCHER_PATCH=$(OCHER_PATCH)
 
 DL_DIR=dl
 BUILD_DIR=build
@@ -183,8 +188,13 @@ $(BUILD_DIR)/ocher: $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB) $(OCHER_OBJS)
 clean:
 	/bin/rm -f $(OCHER_OBJS) $(BUILD_DIR)/ocher
 
-test: ocher
+unittestpp:
+
+test: unittestpp ocher
 	# TODO
+
+dist: ocher
+	tar -C build -Jcf ocher-`uname -s`-$(OCHER_MAJOR).$(OCHER_MINOR).$(OCHER_PATCH).tar.xz ocher
 
 .PHONY: doc
 

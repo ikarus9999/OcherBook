@@ -4,6 +4,8 @@
 struct Settings {
     Settings();
 
+    int trackReading;
+
     unsigned int minutesUntilSleep;
     unsigned int minutesUntilPoweroff;
 
