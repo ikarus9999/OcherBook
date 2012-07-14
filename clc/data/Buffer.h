@@ -9,9 +9,6 @@
 namespace clc
 {
 
-class BufferRef;
-
-
 /**
  *  An efficient copy-on-write string, which can hold C strings or binary data.
  *  @note  This class is 8-bit clean.  If a length is required by the API, the Buffer is assumed
@@ -245,7 +242,7 @@ public:
     // Unchecked char access
     char       operator[](size_t index) const;
 
-    BufferRef  operator[](size_t index);
+    char&  operator[](size_t index);
 
     // Checked char access
     char        ByteAt(size_t index) const;
@@ -288,7 +285,6 @@ public:
 
 private:
     class PosVect;
-    friend class BufferRef;
 
     // Management
     char*        _Alloc(size_t length, bool adoptReferenceCount = true);
@@ -370,6 +366,12 @@ Buffer::operator[](size_t index) const
     return m_data[index];
 }
 
+
+inline char&
+Buffer::operator[](size_t index)
+{
+    return m_data[index];
+}
 
 inline char
 Buffer::ByteAt(size_t index) const
@@ -492,25 +494,6 @@ operator!=(const char *str, const Buffer &string)
 {
     return string != str;
 }
-
-
-class BufferRef {
-public:
-    BufferRef(Buffer& string, size_t position);
-    ~BufferRef() {}
-
-    operator char() const;
-
-    char* operator&();
-    const char* operator&() const;
-
-    BufferRef& operator=(char c);
-    BufferRef& operator=(const BufferRef& rc);
-
-private:
-    Buffer& fString;
-    size_t fPosition;
-};
 
 }
 

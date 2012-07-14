@@ -11,8 +11,10 @@ Layout::Layout() :
     nl(0),
     ws(0),
     pre(0),
-    m_text(new clc::Buffer)
+    m_text(new clc::Buffer),
+    m_textLen(0)
 {
+    m_text->lockBuffer(chunk);
     m_data.lockBuffer(chunk);
 }
 
@@ -73,40 +75,52 @@ void Layout::popLineAttr(unsigned int n)
     push(OpCmd, CmdPopAttr, n);
 }
 
+inline void Layout::_outputChar(char c)
+{
+    if (m_textLen == chunk) {
+        flushText();
+    }
+    (*m_text)[m_textLen++] = c;
+}
+
 void Layout::outputChar(char c)
 {
-    // TODO:  lock large chunks of m_text for efficiency; limit size and flush
     if (isspace(c)) {
         if (! ws) {
             ws = 1;
-            m_text->append(' ', 1);
+            _outputChar(' ');
         }
     } else {
         nl = 0;
         ws = 0;
-        m_text->append(c, 1);
+        _outputChar(c);
     }
 }
 
 void Layout::outputNl()
 {
     if (! nl) {
-        m_text->append('\n', 1);
+        _outputChar('\n');
         nl = 1;
     }
 }
 
 void Layout::outputBr()
 {
-    m_text->append('\n', 1);
+    _outputChar('\n');
     nl = 1;
 }
 
 void Layout::flushText()
 {
-    push(OpCmd, CmdOutputStr, 0);
-    pushPtr(m_text);
-    // m_text pointer is now owned by the layout bytecode.
-    m_text = new clc::Buffer;
+    if (m_textLen) {
+        push(OpCmd, CmdOutputStr, 0);
+        m_text->unlockBuffer(m_textLen);
+        pushPtr(m_text);
+        // m_text pointer is now owned by the layout bytecode.
+        m_text = new clc::Buffer;
+        m_text->lockBuffer(chunk);
+        m_textLen = 0;
+    }
 }
 

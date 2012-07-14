@@ -157,50 +157,6 @@ private:
 };
 
 
-BufferRef::BufferRef(Buffer& string, size_t position)
-    : fString(string), fPosition(position)
-{
-}
-
-
-BufferRef::operator char() const
-{
-    return fPosition < fString.length() ? fString.m_data[fPosition] : 0;
-}
-
-
-BufferRef&
-BufferRef::operator=(char c)
-{
-    fString.fork();
-    fString.m_data[fPosition] = c;
-    return *this;
-}
-
-
-BufferRef&
-BufferRef::operator=(const BufferRef &rc)
-{
-    return operator=(rc.fString.m_data[rc.fPosition]);
-}
-
-
-const char*
-BufferRef::operator&() const
-{
-    return &fString.m_data[fPosition];
-}
-
-
-char*
-BufferRef::operator&()
-{
-    fString.fork();
-    fString.refCount() = -1;  // mark as unsharable
-    return &fString.m_data[fPosition];
-}
-
-
 Buffer::Buffer()
 {
     _Init("", 0);
@@ -1370,13 +1326,6 @@ Buffer::ReplaceSet(const char* setOfChars, const char* with)
 
     _ReplaceAtPositions(&positions, searchLen, with, withLen);
     return *this;
-}
-
-
-BufferRef
-Buffer::operator[](size_t index)
-{
-    return BufferRef(*this, index);
 }
 
 

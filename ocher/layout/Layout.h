@@ -82,6 +82,7 @@ protected:
     void pushLineAttr(LineAttr attr, uint8_t arg);
     void popLineAttr(unsigned int n=1);
 
+    void _outputChar(char c);
     void outputChar(char c);
     void outputNl();
     void outputBr();
@@ -97,6 +98,7 @@ protected:
     int ws;
     int pre;
     clc::Buffer *m_text;
+    unsigned int m_textLen;
 
     static const unsigned int chunk = 1024;
 };

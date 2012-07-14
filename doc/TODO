@@ -43,6 +43,12 @@ per-user:
     - settings
         - fonts
 
+organization:
+    - consider separate use cases:
+        using ereader primarily vs synchronizing with server
+    - ways of grouping / searching (author, genre, read/haven't read, ...)
+    - how to attach metadata to each book?
+
 better Makefile
     - config system
 
