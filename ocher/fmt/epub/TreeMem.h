@@ -1,7 +1,7 @@
 #ifndef OCHER_FILETREE_H
 #define OCHER_FILETREE_H
 
-/** @file Represents a simple filesystem in memory.  */
+/** @file Represents a simple filesystem in memory. */
 
 #include <list>
 

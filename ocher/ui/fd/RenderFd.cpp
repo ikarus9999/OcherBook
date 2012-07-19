@@ -11,8 +11,7 @@
 
 // TODO:  page size
 
-RendererFd::RendererFd(clc::Buffer layout, int fd) :
-    Renderer(layout),
+RendererFd::RendererFd(int fd) :
     m_fd(fd),
     m_width(72),
     m_x(0),
@@ -20,7 +19,6 @@ RendererFd::RendererFd(clc::Buffer layout, int fd) :
     m_page(1),
     ai(1)
 {
-    clc::Log::info("ocher", "RendererFd %d bytes", layout.size());
 }
 
 void RendererFd::setWidth(int width)
@@ -132,7 +130,7 @@ void RendererFd::outputWrapped(clc::Buffer *b)
 }
 
 
-void RendererFd::render(unsigned int offset, unsigned int pageNum)
+void RendererFd::render(unsigned int pageNum)
 {
     unsigned int page = m_page;
     unsigned int x = 0;

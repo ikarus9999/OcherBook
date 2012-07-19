@@ -9,7 +9,7 @@
 
 // TODO:  meta should be attached to the bytecode
 // TODO:  css
-// TODO:  canonicalize:  whitespace, HTML escapes, ...
+// TODO:  canonicalize:  HTML escapes, ...
 
 
 void LayoutEpub::processNode(mxml_node_t *node)
@@ -25,10 +25,10 @@ void LayoutEpub::processNode(mxml_node_t *node)
             // load CSS
             const char *type = mxmlElementGetAttr(node, "type");
             if (type && strcmp(type, "text/css") == 0) {
-                const char *href = mxmlElementGetAttr(node, "hrev");
+                const char *href = mxmlElementGetAttr(node, "href");
                 if (href) {
                     clc::Buffer css;
-                    TreeFile *f = m_epub->getFile(href, css);
+                    css = m_epub->getFile(href);
                     // TODO: parse CSS
                 }
             }

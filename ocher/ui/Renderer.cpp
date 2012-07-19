@@ -1,8 +1,7 @@
 #include "ocher/ui/Renderer.h"
 
 
-Renderer::Renderer(clc::Buffer layout) :
-    m_layout(layout)
+Renderer::Renderer()
 {
 }
 

@@ -1,22 +1,27 @@
 0.0:
-- rough structure, research, dreaming
++ rough structure, research, dreaming
 
 0.1:
-- reliably output text and epub (limited) via fd UI
-    - layout architecture
-        - layout
-            - converts from various file formats to standard in-memory format
-                including applying CSS, canonicalizations, ...
-        - render:  
-            - consumes layout bytecode
++ reliably output text and epub (limited) via fd UI
+    + layout architecture
+        + layout
+            + converts from various file formats to standard in-memory format
+                - including applying CSS, canonicalizations, ...
+        + render:  
+            + consumes layout bytecode
 - more application framework
     - controller:  workflow (via fd)
 - more kobo research
-    - cross-compile fd-only build to run on kobo
+    + cross-compile fd-only build to run on kobo
     - research framebuffer
+- fix bugs:
+    - missing first character when line wrapping fd
 
 0.2:
-- improve fd renderer: paginate, word wrap, ...
+- improve fd renderer: paginate, margins, ...
+- crashes...
+    - airbagfd
+    - harden over many epubs
 - more kobo research
     - framebuffer driven by FreeType
 

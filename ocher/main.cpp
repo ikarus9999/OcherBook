@@ -8,8 +8,8 @@
 #include "ocher/settings/Options.h"
 #include "ocher/ui/Controller.h"
 #include "ocher/ui/Factory.h"
-#ifdef OCHER_UI_MX50
-#include "ocher/ui/mx50/FactoryMx50.h"
+#ifdef OCHER_UI_FB
+#include "ocher/ui/fb/FactoryFb.h"
 #endif
 #ifdef OCHER_UI_NCURSES
 #include "ocher/ui/ncurses/FactoryNcurses.h"
@@ -122,8 +122,8 @@ int main(int argc, char **argv)
 
     initLog();
 
-#ifdef OCHER_UI_MX50
-    drivers.add(new UiFactoryMx50());
+#ifdef OCHER_UI_FB
+    drivers.add(new UiFactoryFb());
 #endif
 #ifdef OCHER_UI_NCURSES
     drivers.add(new UiFactoryNcurses());

@@ -6,9 +6,9 @@
 class RendererFd : public Renderer
 {
 public:
-    RendererFd(clc::Buffer layout, int fd);
+    RendererFd(int fd);
 
-    void render(unsigned int offset, unsigned int pageNum);
+    void render(unsigned int pageNum);
 
     void setWidth(int width);
     void outputWrapped(clc::Buffer *b);

@@ -3,6 +3,8 @@
 
 #include "ocher/ui/Factory.h"
 #include "ocher/ui/fd/BrowseFd.h"
+#include "ocher/ui/fd/RenderFd.h"
+
 
 class UiFactoryFd : public UiFactory
 {
@@ -12,9 +14,11 @@ public:
     bool init();
     const char* getName();
     Browse& getBrowser();
+    Renderer& getRenderer();
 
 protected:
     BrowseFd m_browser;
+    RendererFd m_renderer;
 };
 
 #endif

@@ -21,9 +21,10 @@ public:
 class Renderer
 {
 public:
-    Renderer(clc::Buffer layout);
+    Renderer();
 
-    virtual void render(unsigned int offset, unsigned int pageNum) = 0;
+    virtual void init(clc::Buffer layout) { m_layout = layout; }
+    virtual void render(unsigned int pageNum) = 0;
 
 protected:
     clc::Buffer m_layout;

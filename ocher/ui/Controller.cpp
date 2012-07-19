@@ -3,7 +3,7 @@
 #include "clc/storage/File.h"
 #include "clc/support/Logger.h"
 
-#include "ocher/ui/Browse.h"
+#include "ocher/ui/Factory.h"
 #include "ocher/ui/Controller.h"
 #include "ocher/settings/Options.h"
 
@@ -12,7 +12,6 @@
 #include "ocher/fmt/epub/LayoutEpub.h"
 #include "ocher/fmt/text/Text.h"
 #include "ocher/fmt/text/LayoutText.h"
-#include "ocher/ui/fd/RenderFd.h"
 
 
 Controller::Controller(UiFactory *factory) :
@@ -58,7 +57,8 @@ void Controller::run()
         memLayout = layout.unlock();
     }
 
-    RendererFd r(memLayout, 1);
-    r.render(0, 1);
+    Renderer& renderer = m_factory->getRenderer();
+    renderer.init(memLayout);
+    renderer.render(1);
 }
 

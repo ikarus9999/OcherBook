@@ -1,7 +1,8 @@
 #include "ocher/ui/fd/FactoryFd.h"
 
 UiFactoryFd::UiFactoryFd(int inFd, int outFd) :
-    m_browser(inFd, outFd)
+    m_browser(inFd, outFd),
+    m_renderer(outFd)
 {
 }
 
@@ -20,4 +21,8 @@ Browse& UiFactoryFd::getBrowser()
     return m_browser;
 }
 
+Renderer& UiFactoryFd::getRenderer()
+{
+    return m_renderer;
+}
 

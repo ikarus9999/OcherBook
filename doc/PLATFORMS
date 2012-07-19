@@ -1,0 +1,43 @@
+Notes for building on various platforms
+
+
+-----------------------------------------------------------------------------
+generic POSIX:
+
+Outputs to file descriptor.  Future: ncurses, SDL
+
+Recommended way to build:
+make
+
+
+-----------------------------------------------------------------------------
+Kobo:
+
+Cross-compiles and outputs to file descriptor.  Future: framebuffer
+
+Recommended way to build:
+OCHER_UI_FD=1 OCHER_UI_MX50=0 TARGET=kobo make
+
+
+-----------------------------------------------------------------------------
+Windows:
+
+Builds under Cygwin as a POSIX app.
+May someday think about WIN32 proper.
+
+Recommended way to build:
+make
+
+
+-----------------------------------------------------------------------------
+Mac:
+
+
+-----------------------------------------------------------------------------
+FreeBSD:
+
+
+-----------------------------------------------------------------------------
+Haiku:
+
+
