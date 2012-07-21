@@ -34,15 +34,16 @@ help:
 #################### Common settings
 
 # Common CFLAGS applied everywhere
+CFLAGS?=
 ifeq ($(DEBUG),1)
-	CFLAGS?=-g
+	CFLAGS+=-g
 else
-	CFLAGS?=-Os -DNDEBUG
+	CFLAGS+=-Os -DNDEBUG
 endif
 CFLAGS_COMMON:=$(CFLAGS)
 
 # Additional CFLAGS for ocher (more picky than 3rd party libs)
-OCHER_CFLAGS?=-W -Wall -DOCHER_MAJOR=$(OCHER_MAJOR) -DOCHER_MINOR=$(OCHER_MINOR) -DOCHER_PATCH=$(OCHER_PATCH)
+OCHER_CFLAGS:=-W -Wall -DOCHER_MAJOR=$(OCHER_MAJOR) -DOCHER_MINOR=$(OCHER_MINOR) -DOCHER_PATCH=$(OCHER_PATCH)
 
 DL_DIR=dl
 BUILD_DIR=build
@@ -119,13 +120,12 @@ mxml_clean:
 
 #################### OcherBook
 
-CFLAGS=-I. $(INCS) $(OCHER_CFLAGS) -DSINGLE_THREADED
+OCHER_CFLAGS+=-I. $(INCS) -DSINGLE_THREADED
 ifeq ($(DEBUG),1)
-	CFLAGS+=-DCLC_LOG_LEVEL=5
+	OCHER_CFLAGS+=-DCLC_LOG_LEVEL=5
 else
-	CFLAGS+=-DCLC_LOG_LEVEL=2
+	OCHER_CFLAGS+=-DCLC_LOG_LEVEL=2
 endif
-CFLAGS+=$(CFLAGS_COMMON)
 LD_FLAGS+=-lrt
 
 OCHER_OBJS = \
@@ -164,19 +164,19 @@ OCHER_OBJS += \
 endif
 
 ifeq ($(TARGET),kobo)
-	CFLAGS += \
+	OCHER_CFLAGS += \
 		-DTARGET_KOBO \
 		-DTARGET_KOBOTOUCH
 endif
 
 ifeq ($(OCHER_UI_MX50),1)
-	CFLAGS += -DOCHER_UI_MX50
+	OCHER_CFLAGS += -DOCHER_UI_MX50
 	OCHER_OBJS += \
 		ocher/device/mx50/fb.o
 endif
 
 ifeq ($(OCHER_UI_FD),1)
-	CFLAGS += -DOCHER_UI_FD
+	OCHER_CFLAGS += -DOCHER_UI_FD
 	OCHER_OBJS += \
 		ocher/ui/fd/BrowseFd.o \
 		ocher/ui/fd/RenderFd.o \
@@ -184,7 +184,7 @@ ifeq ($(OCHER_UI_FD),1)
 endif
 
 ifeq ($(OCHER_UI_NCURSES),1)
-	CFLAGS += -DOCHER_UI_NCURSES
+	OCHER_CFLAGS += -DOCHER_UI_NCURSES
 	OCHER_OBJS += \
 		ocher/ui/ncurses/Browse.o \
 		ocher/ui/ncurses/Render.o \
@@ -195,14 +195,14 @@ endif
 #OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 #.c.o:
-#	$(CC) -c $(CFLAGS) -Wno-unused-parameter $*.c -o $@
+#	$(CC) -c $(CFLAGS) $(OCHER_CFLAGS) -Wno-unused-parameter $*.c -o $@
 
 .cpp.o:
-	$(CXX) -c $(CFLAGS) $*.cpp -o $@
+	$(CXX) -c $(CFLAGS) $(OCHER_CFLAGS) $*.cpp -o $@
 
 ocher: $(BUILD_DIR)/ocher
 $(BUILD_DIR)/ocher: $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB) $(OCHER_OBJS)
-	$(CXX) $(LD_FLAGS) $(CFLAGS) -o $@ $(OCHER_OBJS) $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB)
+	$(CXX) $(LD_FLAGS) $(CFLAGS) $(OCHER_CFLAGS) -o $@ $(OCHER_OBJS) $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB)
 
 clean: zlib_clean freetype_clean mxml_clean
 	rm -f $(OCHER_OBJS) $(BUILD_DIR)/ocher

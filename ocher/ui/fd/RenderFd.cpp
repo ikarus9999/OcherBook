@@ -92,6 +92,8 @@ void RendererFd::outputWrapped(clc::Buffer *b)
                 ++p;
                 --len;
             }
+            //write(m_fd, "----------------------------------------------------------------------------", m_width);
+            //write(m_fd, "\n", 1);
         }
 
         // How many chars should go out on this line?
@@ -120,11 +122,13 @@ void RendererFd::outputWrapped(clc::Buffer *b)
         len -= n;
         m_x += n;
         if (nl || m_x >= m_width-1) {
-            write(m_fd, "\n\n", 1);
+            write(m_fd, "\n", 1);
             m_x = 0;
             m_y++;
-            p++;
-            len--;
+            if (nl) {
+                p++;
+                len--;
+            }
         }
     } while (len > 0);
 }
@@ -166,8 +170,10 @@ void RendererFd::render(unsigned int pageNum)
                         applyAttrs(1);
                         break;
                     case Layout::AttrSizeRel:
+                        pushAttrs();
                         break;
                     case Layout::AttrSizeAbs:
+                        pushAttrs();
                         break;
                     default:
                         clc::Log::error("ocher.renderer.fd", "unknown OpPushTextAttr");
