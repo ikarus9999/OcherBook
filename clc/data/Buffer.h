@@ -6,6 +6,16 @@
 #include <sys/types.h>
 #include <stdint.h>
 
+#ifdef USE_CLC_MEMRCHR
+static inline void *memrchr(const void *s, int c, size_t n) {
+    while (n-- > 0) {
+        if ((int)(*((const char*)s)+n) == c)
+            return (void*)(((const char *)s)+n);
+    };
+    return 0;
+}
+#endif
+
 namespace clc
 {
 

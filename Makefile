@@ -4,23 +4,27 @@ OCHER_MAJOR?=0
 OCHER_MINOR?=0
 OCHER_PATCH?=7
 
+TARGET?=posix
+
 OCHER_EPUB=1
 OCHER_TEXT=1
 OCHER_HTML=1
 
-TARGET?=native
+DL_DIR=dl
+BUILD_DIR=build
 
 default: ocher
 
 help:
 	@echo "Environment variables:"
 	@echo ""
-	@echo "Debug"
+	@echo "Configuration"
 	@echo "*	DEBUG=0		Release build"
 	@echo "	DEBUG=1		Enables logging, asserts, etc"
-	@echo "Target device"
-	@echo "*	TARGET=native	Compile natively for testing"
-	@echo "	TARGET=kobo	Compile for KoboTouch"
+	@echo "Target device or operating system"
+	@echo "*	TARGET=posix"
+	@echo "	TARGET=cygwin"
+	@echo "	TARGET=kobo"
 	@echo ""
 	@echo "Targets:"
 	@echo "	clean	Clean"
@@ -31,7 +35,26 @@ help:
 
 
 
-#################### Common settings
+#################### Platforms
+
+ifeq ($(TARGET),posix)
+	CC=gcc
+	CXX=g++
+	OCHER_UI_FD?=1
+else
+	ifeq ($(TARGET),cygwin)
+		CC=gcc
+		CXX=g++
+		OCHER_UI_FD?=1
+	else
+		CC=$(PWD)/arm-2010q1/bin/arm-linux-gcc
+		CXX=$(PWD)/arm-2010q1/bin/arm-linux-g++
+		OCHER_UI_MX50?=1
+	endif
+endif
+
+
+#################### CFLAGS
 
 # Common CFLAGS applied everywhere
 CFLAGS?=
@@ -40,23 +63,13 @@ ifeq ($(DEBUG),1)
 else
 	CFLAGS+=-Os -DNDEBUG
 endif
+ifeq ($(TARGET),cygwin)
+	CFLAGS+=-DUSE_FILE32API  # for minizip
+endif
 CFLAGS_COMMON:=$(CFLAGS)
 
-# Additional CFLAGS for ocher (more picky than 3rd party libs)
-OCHER_CFLAGS:=-W -Wall -DOCHER_MAJOR=$(OCHER_MAJOR) -DOCHER_MINOR=$(OCHER_MINOR) -DOCHER_PATCH=$(OCHER_PATCH)
-
-DL_DIR=dl
-BUILD_DIR=build
-
-ifeq ($(TARGET),native)
-	CC?=gcc
-	CXX?=g++
-	OCHER_UI_FD?=1
-else
-	CC=$(PWD)/arm-2010q1/bin/arm-linux-gcc
-	CXX=$(PWD)/arm-2010q1/bin/arm-linux-g++
-	OCHER_UI_MX50?=1
-endif
+# Additional CFLAGS for ocher
+OCHER_CFLAGS:=-W -Wall --include=clc/config.h -DOCHER_MAJOR=$(OCHER_MAJOR) -DOCHER_MINOR=$(OCHER_MINOR) -DOCHER_PATCH=$(OCHER_PATCH)
 
 
 #################### FreeType
@@ -194,8 +207,8 @@ endif
 #ODIR=obj
 #OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-#.c.o:
-#	$(CC) -c $(CFLAGS) $(OCHER_CFLAGS) -Wno-unused-parameter $*.c -o $@
+.c.o:
+	$(CC) -c $(CFLAGS) $(OCHER_CFLAGS) $*.c -o $@
 
 .cpp.o:
 	$(CXX) -c $(CFLAGS) $(OCHER_CFLAGS) $*.cpp -o $@
