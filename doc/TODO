@@ -15,7 +15,7 @@
     + cross-compile fd-only build to run on kobo
     - research framebuffer
 - fix bugs:
-    - missing first character when line wrapping fd
+    + missing first character when line wrapping fd
 
 0.2:
 - improve fd renderer: paginate, margins, ...
@@ -26,7 +26,7 @@
     - framebuffer driven by FreeType
 
 0.3:
-- css
+- improved css
 
 
 renderers:

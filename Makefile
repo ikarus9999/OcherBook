@@ -9,6 +9,7 @@ TARGET?=posix
 OCHER_EPUB=1
 OCHER_TEXT=1
 OCHER_HTML=1
+OCHER_UI_FD=1
 
 DL_DIR=dl
 BUILD_DIR=build
@@ -22,8 +23,9 @@ help:
 	@echo "*	DEBUG=0		Release build"
 	@echo "	DEBUG=1		Enables logging, asserts, etc"
 	@echo "Target device or operating system"
-	@echo "*	TARGET=posix"
+	@echo "*	TARGET=posix	Linux, BSD, etc"
 	@echo "	TARGET=cygwin"
+	@echo "	TARGET=haiku"
 	@echo "	TARGET=kobo"
 	@echo ""
 	@echo "Targets:"
@@ -40,12 +42,10 @@ help:
 ifeq ($(TARGET),posix)
 	CC=gcc
 	CXX=g++
-	OCHER_UI_FD?=1
 else
 	ifeq ($(TARGET),cygwin)
 		CC=gcc
 		CXX=g++
-		OCHER_UI_FD?=1
 	else
 		CC=$(PWD)/arm-2010q1/bin/arm-linux-gcc
 		CXX=$(PWD)/arm-2010q1/bin/arm-linux-g++
@@ -66,10 +66,17 @@ endif
 ifeq ($(TARGET),cygwin)
 	CFLAGS+=-DUSE_FILE32API  # for minizip
 endif
+ifeq ($(TARGET),haiku)
+	CFLAGS+=-DUSE_FILE32API  # for minizip
+endif
 CFLAGS_COMMON:=$(CFLAGS)
 
 # Additional CFLAGS for ocher
 OCHER_CFLAGS:=-W -Wall --include=clc/config.h -DOCHER_MAJOR=$(OCHER_MAJOR) -DOCHER_MINOR=$(OCHER_MINOR) -DOCHER_PATCH=$(OCHER_PATCH)
+ifeq ($(DEBUG),1)
+	OCHER_CFLAGS+=-Werror
+endif
+OCHER_CFLAGS+=-Wno-unused  # for minizip
 
 
 #################### FreeType
@@ -139,7 +146,9 @@ ifeq ($(DEBUG),1)
 else
 	OCHER_CFLAGS+=-DCLC_LOG_LEVEL=2
 endif
-LD_FLAGS+=-lrt
+ifneq ($(TARGET),haiku)
+	LD_FLAGS+=-lrt
+endif
 
 OCHER_OBJS = \
 	clc/algorithm/Random.o \

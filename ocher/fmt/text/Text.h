@@ -8,6 +8,7 @@ class Text : public Format
 {
 public:
     Text(const char *filename);
+    virtual ~Text() {}
 
     clc::Buffer getFormatName();
 

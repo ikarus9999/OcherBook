@@ -2,3 +2,5 @@
 *.d
 build
 .svn
+test/*.epub
+

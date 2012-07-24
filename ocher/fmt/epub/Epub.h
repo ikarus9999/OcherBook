@@ -20,6 +20,7 @@ class Epub : public Format
 {
 public:
     Epub(const char* epubFilename, const char *password=0);
+    virtual ~Epub() {}
 
     clc::Buffer getFormatName();
 

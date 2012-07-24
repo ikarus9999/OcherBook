@@ -24,6 +24,9 @@ public:
     void dump();
 
     struct ConstItem {
+#if defined(__GNUC__) && __GNUC__ == 2  /* suppress warnings */
+        ConstItem(char* value, const size_t keyLen) : value(value), keyLen(keyLen) {}
+#endif
         char* value;
         const size_t keyLen;
         const unsigned char key[1];

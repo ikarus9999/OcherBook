@@ -16,7 +16,7 @@ int Debugger::enter()
     volatile int r = 0;
 #ifdef HAVE_BUILTIN_TRAP
     __builtin_trap();
-#elif defined(__HAIKU__)
+#elif defined(__BEOS__) || defined(__HAIKU__)
     // TODO
 #else
     *((volatile int*)0) = 1;

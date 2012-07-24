@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <sys/param.h>
 
 #include "clc/data/Buffer.h"
@@ -248,6 +249,9 @@ Buffer::formatList(const char* fmt, va_list argList)
     free(buf);
 #else
     va_list argList2;
+#if defined(__va_copy) && !defined(va_copy)
+#define va_copy __va_copy
+#endif
     va_copy(argList2, argList);
     int len = vsnprintf(NULL, 0, fmt, argList2) + 1;  // measure,
     va_end(argList2);

@@ -22,15 +22,13 @@ class Renderer
 {
 public:
     Renderer();
+    virtual ~Renderer() {}
 
     virtual void init(clc::Buffer layout) { m_layout = layout; }
     virtual void render(unsigned int pageNum) = 0;
 
 protected:
     clc::Buffer m_layout;
-
-
-
 };
 
 #endif

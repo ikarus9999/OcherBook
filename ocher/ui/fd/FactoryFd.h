@@ -10,6 +10,7 @@ class UiFactoryFd : public UiFactory
 {
 public:
     UiFactoryFd(int inFd, int outFd);
+    virtual ~UiFactoryFd() {}
 
     bool init();
     const char* getName();

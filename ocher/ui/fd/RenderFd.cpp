@@ -1,6 +1,8 @@
+#define __USE_GNU  // for memrchr
 #include <unistd.h>
 #include <stdint.h>
 #include <ctype.h>
+#include <string.h>
 
 #include "clc/support/Debug.h"
 #include "clc/support/Logger.h"
@@ -136,9 +138,7 @@ void RendererFd::outputWrapped(clc::Buffer *b)
 
 void RendererFd::render(unsigned int pageNum)
 {
-    unsigned int page = m_page;
-    unsigned int x = 0;
-    unsigned int y = 0;
+    (void)pageNum;  // TODO:  render the requested page, not everything
 
     const unsigned int N = m_layout.size();
     const char *raw = m_layout.data();

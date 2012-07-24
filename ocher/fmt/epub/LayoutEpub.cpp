@@ -80,10 +80,13 @@ void LayoutEpub::processSiblings(mxml_node_t *node)
 
 void LayoutEpub::append(mxml_node_t *tree)
 {
-    mxml_node_t *body = mxmlFindPath(tree, "html/body");
+    // TODO:  "html/body" matches nothing if the root node is "html" (no ?xml) so using "*/body"
+    mxml_node_t *body = mxmlFindPath(tree, "*/body");
     if (body) {
-        // TODO:  huh? mxmlFindPath seems to return the child.  Ok, so processSiblings.
+        // mxmlFindPath returns the first child node.  Ok, so processSiblings.
         processSiblings(body);
+    } else {
+        clc::Log::warn("ocher.fmt.epub.layout", "no body");
     }
 }
 

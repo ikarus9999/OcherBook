@@ -52,6 +52,8 @@ void Controller::run()
             if (tree) {
                 layout.append(tree);
                 mxmlDelete(tree);
+            } else {
+                clc::Log::warn("ocher", "No tree found for spine item %d", i);
             }
         }
         memLayout = layout.unlock();

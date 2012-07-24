@@ -182,7 +182,7 @@ int Epub::getSpineItemByIndex(unsigned int i, clc::Buffer &item)
         clc::Buffer &idref = m_spine[i];
         std::map<clc::Buffer,EpubItem>::iterator it = m_items.find(idref);
         if (it != m_items.end()) {
-            TreeFile *f = m_zip.getFile((*it).second.href, m_contentPath.c_str());
+            TreeFile *f = m_zip.getFile((*it).second.href.c_str(), m_contentPath.c_str());
             if (f) {
                 item = f->data;
                 return 0;
@@ -196,12 +196,16 @@ int Epub::getSpineItemByIndex(unsigned int i, clc::Buffer &item)
 int Epub::getManifestItemById(unsigned int i, clc::Buffer &item)
 {
     // TODO
+    (void)i;
+    (void)item;
     return -1;
 }
 
 int Epub::getContentByHref(const char *href, clc::Buffer &item)
 {
     // TODO
+    (void)href;
+    (void)item;
     return -1;
 }
 
