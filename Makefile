@@ -9,32 +9,12 @@ TARGET?=posix
 OCHER_EPUB=1
 OCHER_TEXT=1
 OCHER_HTML=1
-OCHER_UI_FD=1
+OCHER_UI_FD?=1
+#OCHER_UI_SDL
+#OCHER_UI_MX50
 
 DL_DIR=dl
 BUILD_DIR=build
-
-default: ocher
-
-help:
-	@echo "Environment variables:"
-	@echo ""
-	@echo "Configuration"
-	@echo "*	DEBUG=0		Release build"
-	@echo "	DEBUG=1		Enables logging, asserts, etc"
-	@echo "Target device or operating system"
-	@echo "*	TARGET=posix	Linux, BSD, etc"
-	@echo "	TARGET=cygwin"
-	@echo "	TARGET=haiku"
-	@echo "	TARGET=kobo"
-	@echo ""
-	@echo "Targets:"
-	@echo "	clean	Clean"
-	@echo "*	ocher	Build the e-reader software"
-	@echo "	test	Unit tests"
-	@echo "	doc	Run Doxygen"
-	@echo "	dist	Build distribution packages"
-
 
 
 #################### Platforms
@@ -42,15 +22,15 @@ help:
 ifeq ($(TARGET),posix)
 	CC=gcc
 	CXX=g++
-else
-	ifeq ($(TARGET),cygwin)
-		CC=gcc
-		CXX=g++
-	else
-		CC=$(PWD)/arm-2010q1/bin/arm-linux-gcc
-		CXX=$(PWD)/arm-2010q1/bin/arm-linux-g++
-		OCHER_UI_MX50?=1
-	endif
+endif
+ifeq ($(TARGET),cygwin)
+	CC=gcc
+	CXX=g++
+endif
+ifeq ($(TARGET),kobo)
+	CC=$(PWD)/arm-2010q1/bin/arm-linux-gcc
+	CXX=$(PWD)/arm-2010q1/bin/arm-linux-g++
+	OCHER_UI_MX50?=1
 endif
 
 
@@ -76,7 +56,22 @@ OCHER_CFLAGS:=-W -Wall --include=clc/config.h -DOCHER_MAJOR=$(OCHER_MAJOR) -DOCH
 ifeq ($(DEBUG),1)
 	OCHER_CFLAGS+=-Werror
 endif
-OCHER_CFLAGS+=-Wno-unused  # for minizip
+OCHER_CFLAGS+=-Wno-unused  # TODO: only apply to minizip
+
+default: ocher
+
+
+#################### Fonts
+
+FREEFONT_VER=20120503
+FREEFONT_FILE=freefont-otf-$(FREEFONT_VER).tar.gz
+FREEFONT_URL=http://ftp.gnu.org/gnu/freefont/$(FREEFONT_FILE)
+FREEFONT_TGZ=$(DL_DIR)/$(FREEFONT_FILE)
+
+fonts:
+	[ -e $(FREEFONT_TGZ) ] || (echo -e "Please download $(FREEFONT_URL) to $(DL_DIR)" ; exit 1)
+	mkdir -p $(BUILD_DIR)
+	tar -zxf $(FREEFONT_TGZ) -C $(BUILD_DIR)
 
 
 #################### FreeType
@@ -84,18 +79,18 @@ OCHER_CFLAGS+=-Wno-unused  # for minizip
 FREETYPE_VER=2.4.8
 FREETYPE_TGZ=$(DL_DIR)/freetype-$(FREETYPE_VER).tar.gz
 FREETYPE_DIR=$(BUILD_DIR)/freetype-$(FREETYPE_VER)
-FREETYPE_DEFS=-I$(FREETYPE_DIR)
+FREETYPE_DEFS=-I$(FREETYPE_DIR)/include
 FREETYPE_LIB=$(FREETYPE_DIR)/objs/.libs/libfreetype.a
 
 $(FREETYPE_LIB):
 	mkdir -p $(BUILD_DIR)
 	tar -zxf $(FREETYPE_TGZ) -C $(BUILD_DIR)
-	cd $(FREETYPE_DIR) && CFLAGS="$(CFLAGS_COMMON)" CC=$(CC) ./configure --without-bzip2 --disable-shared
+	cd $(FREETYPE_DIR) && CFLAGS="$(CFLAGS_COMMON)" CC=$(CC) ./configure --without-bzip2 --disable-shared --host i686-linux
 	cd $(FREETYPE_DIR) && $(MAKE)
 
 freetype_clean:
 	cd $(FREETYPE_DIR) && $(MAKE) clean
-
+	rm -f $(FREETYPE_LIB)
 
 #################### Zlib
 
@@ -140,7 +135,8 @@ mxml_clean:
 
 #################### OcherBook
 
-OCHER_CFLAGS+=-I. $(INCS) -DSINGLE_THREADED
+OCHER_CFLAGS+=-I. -DSINGLE_THREADED
+OCHER_CFLAGS+=$(INCS) $(FREETYPE_DEFS)
 ifeq ($(DEBUG),1)
 	OCHER_CFLAGS+=-DCLC_LOG_LEVEL=5
 else
@@ -164,12 +160,12 @@ OCHER_OBJS = \
 	clc/support/Debug.o \
 	clc/support/Logger.o \
 	ocher/device/Device.o \
+	ocher/fmt/Layout.o \
 	ocher/fmt/Meta.o \
-	ocher/layout/Layout.o \
-	ocher/main.o \
-	ocher/ui/Browse.o \
-	ocher/ui/Controller.o \
-	ocher/ui/Renderer.o
+	ocher/ocher.o \
+	ocher/ux/Browse.o \
+	ocher/ux/Controller.o \
+	ocher/ux/Renderer.o
 
 ifeq ($(OCHER_EPUB),1)
 OCHER_OBJS += \
@@ -194,24 +190,27 @@ endif
 ifeq ($(OCHER_UI_MX50),1)
 	OCHER_CFLAGS += -DOCHER_UI_MX50
 	OCHER_OBJS += \
-		ocher/device/mx50/fb.o
+		ocher/output/mx50/fb.o
 endif
 
 ifeq ($(OCHER_UI_FD),1)
 	OCHER_CFLAGS += -DOCHER_UI_FD
 	OCHER_OBJS += \
-		ocher/ui/fd/BrowseFd.o \
-		ocher/ui/fd/RenderFd.o \
-		ocher/ui/fd/FactoryFd.o
+		ocher/ux/fd/BrowseFd.o \
+		ocher/ux/fd/RenderFd.o \
+		ocher/ux/fd/FactoryFd.o
 endif
 
 ifeq ($(OCHER_UI_NCURSES),1)
 	OCHER_CFLAGS += -DOCHER_UI_NCURSES
 	OCHER_OBJS += \
-		ocher/ui/ncurses/Browse.o \
-		ocher/ui/ncurses/Render.o \
-		ocher/ui/ncurses/Factory.o
+		ocher/ux/ncurses/Browse.o \
+		ocher/ux/ncurses/Render.o \
+		ocher/ux/ncurses/Factory.o
 endif
+
+OCHER_OBJS += \
+	ocher/output/FreeType.o
 
 #ODIR=obj
 #OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
@@ -245,3 +244,26 @@ dist-src: clean
 
 doc:
 	cd ocher && doxygen ../doc/Doxyfile
+
+help:
+	@echo "Environment variables:"
+	@echo ""
+	@echo "Configuration"
+	@echo "*	DEBUG=0		Release build"
+	@echo "	DEBUG=1		Enables logging, asserts, etc"
+	@echo "Target device or operating system"
+	@echo "*	TARGET=posix	Linux, BSD, etc"
+	@echo "	TARGET=cygwin"
+	@echo "	TARGET=haiku"
+	@echo "	TARGET=kobo"
+	@echo ""
+	@echo "Targets:"
+	@echo "	clean	Clean"
+	@echo "	fonts	Download GPL fonts"
+	@echo "*	ocher	Build the e-reader software"
+	@echo "	test	Unit tests"
+	@echo "	doc	Run Doxygen"
+	@echo "	dist	Build distribution packages"
+
+
+

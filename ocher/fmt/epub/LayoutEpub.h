@@ -1,7 +1,7 @@
 #ifndef OCHER_FMT_EPUB_LAYOUT_H
 #define OCHER_FMT_EPUB_LAYOUT_H
 
-#include "ocher/layout/Layout.h"
+#include "ocher/fmt/Layout.h"
 
 
 class Epub;

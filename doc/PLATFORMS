@@ -40,4 +40,6 @@ FreeBSD:
 -----------------------------------------------------------------------------
 Haiku:
 
+Recommended way to build:
+TARGET=haiku make
 

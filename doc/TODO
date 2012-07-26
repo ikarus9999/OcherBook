@@ -29,6 +29,11 @@
 - improved css
 
 
+build system:
+    - modularize
+    - detect platform, etc...
+    - download tool
+
 renderers:
     - fd
     - ncurses
