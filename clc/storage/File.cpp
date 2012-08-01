@@ -349,21 +349,11 @@ bool File::isEof() const
     return (feof(m_fd) > 0);
 }
 
-bool File::exists(const Buffer &path)
-{
-    return exists(path.c_str());
-}
-
 bool File::exists(const char *path)
 {
     struct clc_statstruct statbuf;
     int r = clc_stat(path, &statbuf);
     return r == 0;
-}
-
-bool File::isDirectory(const Buffer &path)
-{
-    return isDirectory(path.c_str());
 }
 
 bool File::isDirectory(const char *path)
@@ -377,11 +367,6 @@ bool File::isDirectory(const char *path)
         return true;
     }
     return false;
-}
-
-int File::removePath(const Buffer &path)
-{
-    return removePath(path.c_str());
 }
 
 int File::removePath(const char *path)
@@ -398,11 +383,6 @@ int File::removePath(const char *path)
     return 0;
 }
 
-int File::mkdir(const Buffer &path)
-{
-    return File::mkdir(path.c_str());
-}
-
 int File::mkdir(const char *path)
 {
     int r = 0;
@@ -414,11 +394,6 @@ int File::mkdir(const char *path)
     }
     umask(oldmask);
     return r;
-}
-
-int File::rename(const Buffer &oldPath, const Buffer &newPath)
-{
-    return rename(oldPath.c_str(), newPath.c_str());
 }
 
 int File::rename(const char *oldPath, const char *newPath)

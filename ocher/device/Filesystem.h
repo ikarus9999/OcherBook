@@ -3,7 +3,11 @@
 
 class Filesystem
 {
-    // TODO: respect OCHER_ROOT in env
+public:
+    Filesystem();
+
+    void mkdirs();
+
 };
 
 #endif

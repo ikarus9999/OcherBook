@@ -164,21 +164,7 @@ public:
      * @param path the path to check
      * @return bool true if it exists, false otherwise
      */
-    static bool exists(const Buffer &path);
-
-    /**
-     * Checks for the existence of a file or directory at the given path.
-     * @param path the path to check
-     * @return bool true if it exists, false otherwise
-     */
     static bool exists(const char *path);
-
-    /**
-     * Checks if the entry in the filesystem at the given path is a directory.
-     * @param path the path to check
-     * @return bool true if the entry is a directory, false otherwise.
-     */
-    static bool isDirectory(const Buffer &path);
 
     /**
      * Checks if the entry in the filesystem at the given path is a directory.
@@ -192,13 +178,6 @@ public:
      * @param path the path to remove
      * @return 0 or errno
      */
-    static int removePath(const Buffer &path);
-
-    /**
-     * Remove the entry at the given path.  Path may be either a file or a directory.
-     * @param path the path to remove
-     * @return 0 or errno
-     */
     static int removePath(const char *path);
 
     /**
@@ -206,22 +185,7 @@ public:
      * @param path the path of the directory to create
      * @return 0 or errno
      */
-    static int mkdir(const Buffer &path);
-
-    /**
-     * Creates a directory at the specified path.  Does not create intermediate directories.
-     * @param path the path of the directory to create
-     * @return 0 or errno
-     */
     static int mkdir(const char *path);
-
-    /**
-     * Renames a file or directory at the given path.
-     * @param oldPath the path to rename from
-     * @param newPath the path to rename to
-     * @return 0 or errno
-     */
-    static int rename(const Buffer &oldPath, const Buffer &newPath);
 
     /**
      * Renames a file or directory at the given path.

@@ -3,21 +3,23 @@
 
 #include "ocher/ux/Factory.h"
 #include "ocher/ux/fb/BrowseFb.h"
+#include "ocher/ux/fb/RenderFb.h"
+#include "ocher/output/FreeType.h"
 
 
 class UiFactoryFb : public UiFactory
 {
 public:
-    UiFactoryFb();
-    virtual ~UiFactoryFb() {}
+    UiFactoryFb(FrameBuffer *fb);
+    ~UiFactoryFb() {}
 
-    bool init();
-    const char* getName();
     Browse& getBrowser();
     Renderer& getRenderer();
 
 protected:
+    FreeType m_ft;
     BrowseFb m_browser;
+    RenderFb m_render;
 };
 
 #endif

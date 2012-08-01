@@ -1,108 +1,61 @@
-#define __USE_GNU  // for memrchr
-#include <unistd.h>
-#include <stdint.h>
 #include <ctype.h>
-#include <string.h>
 
 #include "clc/support/Debug.h"
 #include "clc/support/Logger.h"
 
-#include "ocher/settings/Options.h"
-#include "ocher/ux/fd/RenderFd.h"
 #include "ocher/fmt/Layout.h"
+#include "ocher/output/FreeType.h"
+#include "ocher/output/FrameBuffer.h"
+#include "ocher/settings/Options.h"
+#include "ocher/ux/fb/RenderFb.h"
 
 
-// TODO:  page size
-
-RendererFd::RendererFd() :
-    m_fd(-1),
-    m_width(72),
-    m_x(0),
-    m_y(0),
+RenderFb::RenderFb(FreeType *ft, FrameBuffer *fb) :
+    m_ft(ft),
+    m_fb(fb),
+    m_col(0),
+    m_penX(0),
+    m_penY(20),  //TODO
     m_page(1),
     ai(1)
 {
 }
 
-bool RendererFd::init()
+bool RenderFb::init()
 {
-    m_fd = opt.inFd;
+    m_ft->setSize(12);
     return true;
 }
 
-void RendererFd::setWidth(int width)
-{
-    m_width = width;
-}
-
-void RendererFd::enableUl()
-{
-    write(m_fd, "\x1b[4m", 5);
-}
-
-void RendererFd::disableUl()
-{
-    write(m_fd, "\x1b[24m", 6);
-}
-
-void RendererFd::enableEm()
-{
-    write(m_fd, "\x1b[1m", 5);
-}
-
-void RendererFd::disableEm()
-{
-    write(m_fd, "\x1b[22m", 6);
-}
-
-void RendererFd::pushAttrs()
+void RenderFb::pushAttrs()
 {
     a[ai+1] = a[ai];
     ai++;
 }
 
-void RendererFd::applyAttrs(int i)
-{
-    if (a[ai].ul && !a[ai-i].ul) {
-        enableUl();
-    } else if (!a[ai].ul && a[ai-i].ul) {
-        disableUl();
-    }
-
-    if (a[ai].em && !a[ai-i].em) {
-        enableEm();
-    } else if (!a[ai].em && a[ai-i].em) {
-        disableEm();
-    }
-}
-
-void RendererFd::popAttrs()
+void RenderFb::popAttrs()
 {
     ai--;
-    applyAttrs(-1);
 }
 
-void RendererFd::outputWrapped(clc::Buffer *b)
+void RenderFb::outputWrapped(clc::Buffer *b)
 {
-    if (m_width <= 0) {
-        write(m_fd, b->data(), b->size());
-        return;
-    }
-
     int len = b->size();
     const char *p = b->data();
 
+    int width = m_fb->width();
+    // TODO: a complete hack of an approximation of # of char on a line
+    int w = width / 8;
     do {
-        int w = m_width - m_x;
-
         // If at start of line, eat spaces
-        if (m_x == 0) {
+        if (m_col == 0) {
             while (*p != '\n' && isspace(*p)) {
                 ++p;
                 --len;
             }
         }
 
+#if 1
         // How many chars should go out on this line?
         const char *nl = 0;
         int n = w;
@@ -123,15 +76,21 @@ void RendererFd::outputWrapped(clc::Buffer *b)
         }
         if (nl)
             n = nl - p;
+#endif
 
-        write(m_fd, p, n);
+        for (int i = 0; i < n; ++i) {
+            // TODO: UTF32
+            m_ft->renderGlyph(p[i], &m_penX, &m_penY);
+            m_col ++;
+        }
+
         p += n;
         len -= n;
-        m_x += n;
-        if (nl || m_x >= m_width-1) {
-            write(m_fd, "\n", 1);
-            m_x = 0;
-            m_y++;
+        m_penX += n;
+        if (nl || m_penX >= width-1) {
+            //write(m_fd, "\n", 1);
+            m_penX = 0;
+            m_penY += 20;  // TODO
             if (nl) {
                 p++;
                 len--;
@@ -140,8 +99,7 @@ void RendererFd::outputWrapped(clc::Buffer *b)
     } while (len > 0);
 }
 
-
-void RendererFd::render(unsigned int pageNum)
+void RenderFb::render(unsigned int pageNum)
 {
     (void)pageNum;  // TODO:  render the requested page, not everything
 
@@ -157,22 +115,19 @@ void RendererFd::render(unsigned int pageNum)
         unsigned int arg = code & 0xff;
         switch (opType) {
             case Layout::OpPushTextAttr:
-                clc::Log::debug("ocher.renderer.fd", "OpPushTextAttr");
+                clc::Log::debug("ocher.render.fb", "OpPushTextAttr");
                 switch (op) {
                     case Layout::AttrBold:
                         pushAttrs();
                         a[ai].b = 1;
-                        applyAttrs(1);
                         break;
                     case Layout::AttrUnderline:
                         pushAttrs();
                         a[ai].ul = 1;
-                        applyAttrs(1);
                         break;
                     case Layout::AttrItalics:
                         pushAttrs();
                         a[ai].em = 1;
-                        applyAttrs(1);
                         break;
                     case Layout::AttrSizeRel:
                         pushAttrs();
@@ -181,13 +136,13 @@ void RendererFd::render(unsigned int pageNum)
                         pushAttrs();
                         break;
                     default:
-                        clc::Log::error("ocher.renderer.fd", "unknown OpPushTextAttr");
+                        clc::Log::error("ocher.render.fb", "unknown OpPushTextAttr");
                         ASSERT(0);
                         break;
                 }
                 break;
             case Layout::OpPushLineAttr:
-                clc::Log::debug("ocher.renderer.fd", "OpPushLineAttr");
+                clc::Log::debug("ocher.render.fb", "OpPushLineAttr");
                 switch (op) {
                     case Layout::LineJustifyLeft:
                         break;
@@ -198,7 +153,7 @@ void RendererFd::render(unsigned int pageNum)
                     case Layout::LineJustifyRight:
                         break;
                     default:
-                        clc::Log::error("ocher.renderer.fd", "unknown OpPushLineAttr");
+                        clc::Log::error("ocher.render.fb", "unknown OpPushLineAttr");
                         ASSERT(0);
                         break;
                 }
@@ -206,25 +161,26 @@ void RendererFd::render(unsigned int pageNum)
             case Layout::OpCmd:
                 switch (op) {
                     case Layout::CmdPopAttr:
-                        clc::Log::debug("ocher.renderer.fd", "OpCmd CmdPopAttr");
+                        clc::Log::debug("ocher.render.fb", "OpCmd CmdPopAttr");
                         if (arg == 0)
                             arg = 1;
                         while (arg--)
                             popAttrs();
                         break;
                     case Layout::CmdOutputStr: {
-                        clc::Log::debug("ocher.renderer.fd", "OpCmd CmdOutputStr");
+                        clc::Log::debug("ocher.render.fb", "OpCmd CmdOutputStr");
                         ASSERT(i + sizeof(clc::Buffer*) <= N);
                         clc::Buffer *str = *(clc::Buffer**)(raw+i);
                         i += sizeof(clc::Buffer*);
                         outputWrapped(str);
+                        m_fb->update(0, 0, m_fb->width(), m_fb->height(), false); // DDD
                         break;
                     }
                     case Layout::CmdForcePage:
-                        clc::Log::debug("ocher.renderer.fd", "OpCmd CmdForcePage");
+                        clc::Log::debug("ocher.render.fb", "OpCmd CmdForcePage");
                         break;
                     default:
-                        clc::Log::error("ocher.renderer.fd", "unknown OpCmd");
+                        clc::Log::error("ocher.render.fb", "unknown OpCmd");
                         ASSERT(0);
                         break;
                 }
@@ -234,7 +190,7 @@ void RendererFd::render(unsigned int pageNum)
             case Layout::OpImage:
                 break;
             default:
-                clc::Log::error("ocher.renderer.fd", "unknown op type");
+                clc::Log::error("ocher.render.fb", "unknown op type");
                 ASSERT(0);
                 break;
 

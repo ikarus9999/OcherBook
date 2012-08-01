@@ -2,21 +2,10 @@
 #include "ocher/ocher.h"
 
 
-UX_DRIVER_REGISTER(Fb);
-
-
-UiFactoryFb::UiFactoryFb()
+UiFactoryFb::UiFactoryFb(FrameBuffer *fb) :
+    m_ft(fb),
+    m_render(&m_ft, fb)
 {
-}
-
-bool UiFactoryFb::init()
-{
-    return true;
-}
-
-const char* UiFactoryFb::getName()
-{
-    return "fb";
 }
 
 Browse& UiFactoryFb::getBrowser()
@@ -26,7 +15,7 @@ Browse& UiFactoryFb::getBrowser()
 
 Renderer& UiFactoryFb::getRenderer()
 {
-    return m_renderer;
+    return m_render;
 }
 
 

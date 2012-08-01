@@ -1,7 +1,11 @@
-OcherBook is an open-source ebook reader, supporting multiple file
-formats and output devices.
+OcherBook is an open-source ebook reader, supporting multiple file formats and
+output devices.  It focuses on creating a good (and portable) ebook reading
+experience, but not necessarily the complete software stack.  For example, for
+expediency it may reuse the existing kernel on ereaders.
 
 To get started, look in the doc directory, and/or "make help".
+
+To see what platforms are supported and to what degree, see doc/PLATFORMS.
 
 See also:
 OcherBook                   http://ccoffing.net/tech/proj/ocherbook

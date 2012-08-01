@@ -1,7 +1,7 @@
 0.0:
 + rough structure, research, dreaming
 
-0.1:
+0.1:  
 + reliably output text and epub (limited) via fd UI
     + layout architecture
         + layout
@@ -9,13 +9,15 @@
                 - including applying CSS, canonicalizations, ...
         + render:  
             + consumes layout bytecode
+- device
+    - filesystem abstraction
 - more application framework
     - controller:  workflow (via fd)
 - more kobo research
     + cross-compile fd-only build to run on kobo
     - research framebuffer
-- fix bugs:
-    + missing first character when line wrapping fd
+        - freetype build on kobo is broken
+        - see ReaderZ
 
 0.2:
 - improve fd renderer: paginate, margins, ...

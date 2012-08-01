@@ -12,13 +12,13 @@
 class Device
 {
 public:
-    virtual clc::Buffer getMac() = 0;
-    virtual clc::Buffer getIp() = 0;
+    clc::Buffer getVersion();
+    clc::Buffer getBuildDate();
 
-    virtual void reboot() {}
+    clc::Buffer getMac();
+    clc::Buffer getIp();
 
-    virtual clc::Buffer getVersion();
-    virtual clc::Buffer getBuildDate();
+    void reboot() {}
 
     Filesystem fs;
 };
@@ -27,6 +27,8 @@ public:
  * The device singleton
  */
 extern Device *device;
+
+void initDevice();
 
 #endif
 

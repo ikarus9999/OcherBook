@@ -12,6 +12,7 @@ public:
     FreeType(FrameBuffer *fb);
 
     void setSize(unsigned int points);
+    bool renderGlyph(int glyph, int *penX, int *penY);
 
 protected:
     FT_Library m_lib;

@@ -5,6 +5,7 @@
 #include "clc/support/Logger.h"
 #include "clc/support/LogAppenders.h"
 
+#include "ocher/device/Device.h"
 #include "ocher/settings/Options.h"
 #include "ocher/ux/Controller.h"
 #include "ocher/ux/Factory.h"
@@ -29,6 +30,10 @@ void initLog()
         l->setLevel(clc::Log::Debug);
     else
         l->setLevel(clc::Log::Trace);
+}
+
+void initSettings()
+{
 }
 
 void usage(const char *msg)
@@ -114,6 +119,8 @@ int main(int argc, char **argv)
     }
 
     initLog();
+    initDevice();
+    initSettings();
 
     UiFactory *driver = 0;
     for (unsigned int i = 0; i < drivers.size(); ++i) {

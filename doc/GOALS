@@ -1,16 +1,25 @@
-Technology is hard to push back against.  Books are/will be moving to electronic.
-But what problems does that pose?
+OcherBook is an open-source ebook reader, supporting multiple file formats and
+output devices.  It focuses on creating a good (and portable) ebook reading
+experience, but not necessarily the complete software stack.  For example, for
+expediency it may reuse the existing kernel on ereaders.
+
+
+Technology is hard to push back against.  Books are/will be moving to
+electronic.  But what problems does that pose?
     - privacy
     - control
     - accessibility
     - reliability
 
-
+How does OcherBook handle these issues?
 
 Privacy:
     - All local, no cloud
     - Open source
     - No tracking / cloud / FB integration / etc
+    - Encryption
+        - of personal reading record / notes
+        - ...
 
 Control:
     - All local, no cloud
@@ -28,11 +37,11 @@ Reliability:
     - books do not crash or hang
 
 
-
 How do we enjoy e-books without creating a new dark age?  (Consider DRM,
 technological obsolescence, peak oil, ...)
     - discourage DRM
     - support low power (Raspberry Pi?)
     - support old tech
     - archiving is still the user's problem...
+        - or is there a server side?
 

@@ -22,10 +22,12 @@ BUILD_DIR=build
 ifeq ($(TARGET),posix)
 	CC=gcc
 	CXX=g++
+	OCHER_UI_SDL?=1
 endif
 ifeq ($(TARGET),cygwin)
 	CC=gcc
 	CXX=g++
+	OCHER_UI_SDL?=1
 endif
 ifeq ($(TARGET),kobo)
 	CC=$(PWD)/arm-2010q1/bin/arm-linux-gcc
@@ -89,7 +91,7 @@ $(FREETYPE_LIB):
 	cd $(FREETYPE_DIR) && $(MAKE)
 
 freetype_clean:
-	cd $(FREETYPE_DIR) && $(MAKE) clean
+	cd $(FREETYPE_DIR) && $(MAKE) clean || true
 	rm -f $(FREETYPE_LIB)
 
 #################### Zlib
@@ -145,6 +147,9 @@ endif
 ifneq ($(TARGET),haiku)
 	LD_FLAGS+=-lrt
 endif
+ifeq ($(OCHER_UI_SDL),1)
+	LD_FLAGS+=-lSDL
+endif
 
 OCHER_OBJS = \
 	clc/algorithm/Random.o \
@@ -160,12 +165,15 @@ OCHER_OBJS = \
 	clc/support/Debug.o \
 	clc/support/Logger.o \
 	ocher/device/Device.o \
+	ocher/device/Filesystem.o \
 	ocher/fmt/Layout.o \
 	ocher/fmt/Meta.o \
 	ocher/ocher.o \
 	ocher/ux/Browse.o \
 	ocher/ux/Controller.o \
-	ocher/ux/Renderer.o
+	ocher/ux/Renderer.o \
+	ocher/ux/fb/RenderFb.o \
+	ocher/ux/fb/FactoryFb.o
 
 ifeq ($(OCHER_EPUB),1)
 OCHER_OBJS += \
@@ -187,10 +195,18 @@ ifeq ($(TARGET),kobo)
 		-DTARGET_KOBOTOUCH
 endif
 
+ifeq ($(OCHER_UI_SDL),1)
+	OCHER_CFLAGS += -DOCHER_UI_SDL
+	OCHER_OBJS += \
+		ocher/output/sdl/FbSdl.o \
+		ocher/ux/fb/FactoryFbSdl.o
+endif
+
 ifeq ($(OCHER_UI_MX50),1)
 	OCHER_CFLAGS += -DOCHER_UI_MX50
 	OCHER_OBJS += \
-		ocher/output/mx50/fb.o
+		ocher/output/mx50/fb.o \
+		ocher/ux/fb/FactoryFbMx50.o
 endif
 
 ifeq ($(OCHER_UI_FD),1)
