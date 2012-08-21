@@ -6,6 +6,7 @@
 
 #include "clc/data/Buffer.h"
 
+#include "ocher/fmt/Format.h"
 #include "ocher/fmt/epub/UnzipCache.h"
 
 
@@ -15,10 +16,11 @@ struct EpubItem
     clc::Buffer mediaType;
 };
 
-class Epub
+class Epub : public Format
 {
 public:
     Epub(const char* epubFilename, const char *password=0);
+    virtual ~Epub() {}
 
     clc::Buffer getFormatName();
 
@@ -26,8 +28,13 @@ public:
     clc::Buffer m_uid;
     clc::Buffer m_title;
 
-    TreeFile* getFile(const char *filename, const char *relative=0) {
-        return m_zip.getFile(filename, relative);
+    clc::Buffer getFile(const char *filename) {
+        TreeFile *f = m_zip.getFile(filename, m_contentPath.c_str());
+        clc::Buffer b;
+        if (f) {
+            b = f->data;
+        }
+        return b;
     }
 
     int getSpineItemByIndex(unsigned int i, clc::Buffer &item);

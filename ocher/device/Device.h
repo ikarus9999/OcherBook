@@ -3,17 +3,32 @@
 
 #include "clc/data/Buffer.h"
 
+#include "ocher/device/Filesystem.h"
+
+
+/**
+ * Represents the physical e-reader device.
+ */
 class Device
 {
 public:
-    virtual clc::Buffer getMac() = 0;
-    virtual clc::Buffer getIp() = 0;
+    clc::Buffer getVersion();
+    clc::Buffer getBuildDate();
 
-    virtual void reboot() {}
+    clc::Buffer getMac();
+    clc::Buffer getIp();
 
-    virtual clc::Buffer getVersion();
-    virtual clc::Buffer getBuildDate();
+    void reboot() {}
+
+    Filesystem fs;
 };
+
+/**
+ * The device singleton
+ */
+extern Device *device;
+
+void initDevice();
 
 #endif
 

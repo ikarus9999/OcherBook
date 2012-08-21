@@ -1,16 +1,23 @@
-#ifndef LIBCLC_DATA_BUFFER_H
-#define LIBCLC_DATA_BUFFER_H
+#ifndef LIBCLC_BUFFER_H
+#define LIBCLC_BUFFER_H
 
 #include <string.h>
 #include <stdarg.h>
 #include <sys/types.h>
 #include <stdint.h>
 
+#ifdef USE_CLC_MEMRCHR
+static inline void *memrchr(const void *s, int c, size_t n) {
+    while (n-- > 0) {
+        if ((int)(*((const char*)s)+n) == c)
+            return (void*)(((const char *)s)+n);
+    };
+    return 0;
+}
+#endif
+
 namespace clc
 {
-
-class BufferRef;
-
 
 /**
  *  An efficient copy-on-write string, which can hold C strings or binary data.
@@ -21,7 +28,7 @@ class BufferRef;
  *      Buffers are intended to be shared among threads, either external locking must be used,
  *      or all threads must treat the Buffer as read-only, or after a thread gives a copy of the
  *      Buffer to another thread which may mutate it, the giving thread can only safely destroy
- *      its object but not dereference it.  If threading is not used, compile with NTHREADS
+ *      its object but not dereference it.  If threading is not used, compile with SINGLE_THREADED.
  *  @todo  Where possible, make compatible with std::string
  *  @todo  fork vs _DetachWith  (fork is used in some places _DetachWith would be
  *          better; _DetachWith has dead code path; possibly combine?)
@@ -245,7 +252,7 @@ public:
     // Unchecked char access
     char       operator[](size_t index) const;
 
-    BufferRef  operator[](size_t index);
+    char&  operator[](size_t index);
 
     // Checked char access
     char        ByteAt(size_t index) const;
@@ -288,7 +295,6 @@ public:
 
 private:
     class PosVect;
-    friend class BufferRef;
 
     // Management
     char*        _Alloc(size_t length, bool adoptReferenceCount = true);
@@ -370,6 +376,12 @@ Buffer::operator[](size_t index) const
     return m_data[index];
 }
 
+
+inline char&
+Buffer::operator[](size_t index)
+{
+    return m_data[index];
+}
 
 inline char
 Buffer::ByteAt(size_t index) const
@@ -492,25 +504,6 @@ operator!=(const char *str, const Buffer &string)
 {
     return string != str;
 }
-
-
-class BufferRef {
-public:
-    BufferRef(Buffer& string, size_t position);
-    ~BufferRef() {}
-
-    operator char() const;
-
-    char* operator&();
-    const char* operator&() const;
-
-    BufferRef& operator=(char c);
-    BufferRef& operator=(const BufferRef& rc);
-
-private:
-    Buffer& fString;
-    size_t fPosition;
-};
 
 }
 

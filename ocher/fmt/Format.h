@@ -3,11 +3,12 @@
 
 #include "clc/data/Buffer.h"
 
+/**
+ *  Base class for file-format readers.
+ */
 class Format
 {
 public:
-    Format(const char *epubFilename);
-
     virtual clc::Buffer getFormatName() = 0;
 };
 

@@ -1,0 +1,71 @@
+Notes for building on various platforms
+
+
+-----------------------------------------------------------------------------
+generic POSIX:
+
+Status:
+Outputs to:
+    - file descriptor
+    - SDL
+Ncurses is "RSN".
+
+Recommended way to build:
+make
+
+
+-----------------------------------------------------------------------------
+Kobo:
+
+Status:
+Cross-compiles and outputs to file descriptor.  E-ink display is "RSN".
+
+Setup:
+Get the dev tools:
+    http://blog.ringerc.id.au/2011/01/preparing-development-environment-for.html
+Get source from KoboLabs:
+    https://github.com/kobolabs/Kobo-Reader
+Make some links from within OcherBook:
+$ cd OcherBook
+$ ln -s ..blah../kobo/arm-2010q1/
+$ ln -s ..blah../KoboLabs/hw/imx508/ntx/linux-2.6.35.3/include/linux/
+
+Recommended way to build:
+# Until e-ink fb is better, prefer fd:
+OCHER_UI_FD=1 OCHER_UI_MX50=0 TARGET=kobo make
+
+
+-----------------------------------------------------------------------------
+Windows:
+
+Status:
+Builds under Cygwin as a POSIX app.
+May someday think about WIN32 proper, perhaps via SDL.
+
+Recommended way to build:
+make
+
+
+-----------------------------------------------------------------------------
+Mac:
+
+Status:
+Untested; probably works with fd.
+
+
+-----------------------------------------------------------------------------
+FreeBSD:
+
+Status:
+Untested; probably works with fd.
+
+
+-----------------------------------------------------------------------------
+Haiku:
+
+Status:
+Currently only outputs via fd.  Plan to output native too.
+
+Current recommended way to build:
+TARGET=haiku make
+

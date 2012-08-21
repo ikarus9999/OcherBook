@@ -9,7 +9,7 @@
 namespace clc
 {
 
-static inline void moveItems(void** items, size_t offset, size_t count)
+static inline void moveItems(void** items, int offset, size_t count)
 {
     if (count > 0 && offset != 0)
         memmove(items + offset, items, count * sizeof(void*));

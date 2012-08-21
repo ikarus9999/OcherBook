@@ -1,5 +1,5 @@
-#ifndef LIBCLC_OS_CLOCK_H
-#define LIBCLC_OS_CLOCK_H
+#ifndef LIBCLC_CLOCK_H
+#define LIBCLC_CLOCK_H
 
 /** @file
  *  Cross-platform clock class.

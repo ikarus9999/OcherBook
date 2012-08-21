@@ -1,5 +1,0 @@
-#ifndef OCHER_FRAMEBUFFER_H
-#define OCHER_FRAMEBUFFER_H
-
-#endif
-

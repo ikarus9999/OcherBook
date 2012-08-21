@@ -4,11 +4,12 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <sys/param.h>
 
 #include "clc/data/Buffer.h"
 #include "clc/support/Debug.h"
-#ifndef NTHREADS
+#ifndef SINGLE_THREADED
 #include "clc/os/Atomic.h"
 #endif
 
@@ -78,7 +79,7 @@ Buffer::refCount() const
 
 inline int32_t Buffer::incRef()
 {
-#ifdef NTHREADS
+#ifdef SINGLE_THREADED
     return ++refCount();
 #else
     return atomicAdd(&refCount(), 1) + 1;
@@ -87,7 +88,7 @@ inline int32_t Buffer::incRef()
 
 inline int32_t Buffer::decRef()
 {
-#ifdef NTHREADS
+#ifdef SINGLE_THREADED
     return --refCount();
 #else
     return atomicAdd(&refCount(), -1) - 1;
@@ -155,50 +156,6 @@ private:
     size_t  fBufferSize;
     size_t* fBuffer;
 };
-
-
-BufferRef::BufferRef(Buffer& string, size_t position)
-    : fString(string), fPosition(position)
-{
-}
-
-
-BufferRef::operator char() const
-{
-    return fPosition < fString.length() ? fString.m_data[fPosition] : 0;
-}
-
-
-BufferRef&
-BufferRef::operator=(char c)
-{
-    fString.fork();
-    fString.m_data[fPosition] = c;
-    return *this;
-}
-
-
-BufferRef&
-BufferRef::operator=(const BufferRef &rc)
-{
-    return operator=(rc.fString.m_data[rc.fPosition]);
-}
-
-
-const char*
-BufferRef::operator&() const
-{
-    return &fString.m_data[fPosition];
-}
-
-
-char*
-BufferRef::operator&()
-{
-    fString.fork();
-    fString.refCount() = -1;  // mark as unsharable
-    return &fString.m_data[fPosition];
-}
 
 
 Buffer::Buffer()
@@ -292,6 +249,9 @@ Buffer::formatList(const char* fmt, va_list argList)
     free(buf);
 #else
     va_list argList2;
+#if defined(__va_copy) && !defined(va_copy)
+#define va_copy __va_copy
+#endif
     va_copy(argList2, argList);
     int len = vsnprintf(NULL, 0, fmt, argList2) + 1;  // measure,
     va_end(argList2);
@@ -1370,13 +1330,6 @@ Buffer::ReplaceSet(const char* setOfChars, const char* with)
 
     _ReplaceAtPositions(&positions, searchLen, with, withLen);
     return *this;
-}
-
-
-BufferRef
-Buffer::operator[](size_t index)
-{
-    return BufferRef(*this, index);
 }
 
 

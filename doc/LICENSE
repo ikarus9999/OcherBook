@@ -18,4 +18,11 @@ Modified GPLv2.
 See http://minixml.org/documentation.php/license.html#LICENSE
 
 FreeType:
+BSD with advertising clause or GPLv2.
+See http://www.freetype.org/license.html
+Used in OcherBook as BSD with advertising clause
+
+UnitTest++
+MIT license.
+http://unittest-cpp.sourceforge.net/
 

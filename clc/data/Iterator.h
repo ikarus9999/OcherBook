@@ -1,5 +1,5 @@
-#ifndef LIBCLC_DATA_ITERATOR_H
-#define LIBCLC_DATA_ITERATOR_H
+#ifndef LIBCLC_ITERATOR_H
+#define LIBCLC_ITERATOR_H
 
 #include "clc/support/Debug.h"
 

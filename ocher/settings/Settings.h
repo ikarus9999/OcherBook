@@ -4,8 +4,16 @@
 struct Settings {
     Settings();
 
+    void load();
+    void save();
+
+    int trackReading;
+
     unsigned int minutesUntilSleep;
     unsigned int minutesUntilPoweroff;
+
+    // Libraries:
+    //   filesystem point(s)
 
     // sleep screen text/icon
     // power-off screen text/icon

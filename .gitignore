@@ -1,2 +1,6 @@
 *.o
+*.d
 build
+.svn
+test/*.epub
+
