@@ -7,6 +7,7 @@
 #include "clc/support/Logger.h"
 #include "clc/support/LogAppenders.h"
 
+#include "ocher_config.h"
 #include "ocher/device/Device.h"
 #include "ocher/settings/Options.h"
 #include "ocher/settings/Settings.h"
@@ -18,7 +19,9 @@ struct Options opt;
 
 void initCrash()
 {
+#ifdef OCHER_AIRBAG_FD
     airbag_init_fd(2, 0);
+#endif
 }
 
 void initLog()

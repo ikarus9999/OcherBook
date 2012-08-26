@@ -1,5 +1,5 @@
 *.o
 *.d
-build
+build/
 test/*.epub
 

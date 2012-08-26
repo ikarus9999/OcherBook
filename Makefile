@@ -31,6 +31,13 @@ ifeq ($(OCHER_TARGET),kobo)
 	CC=$(PWD)/arm-2010q1/bin/arm-linux-gcc
 	CXX=$(PWD)/arm-2010q1/bin/arm-linux-g++
 endif
+ifeq ($(OCHER_VERBOSE),1)
+	QUIET=
+	MSG=@true
+else
+	QUIET=@
+	MSG=@echo
+endif
 
 
 #################### CFLAGS
@@ -44,6 +51,7 @@ else
 endif
 ifeq ($(OCHER_TARGET),cygwin)
 	CFLAGS+=-DUSE_FILE32API  # for minizip
+	INCS+=-I/usr/include/ncurses
 endif
 ifeq ($(OCHER_TARGET),haiku)
 	CFLAGS+=-DUSE_FILE32API  # for minizip
@@ -68,8 +76,8 @@ FREEFONT_URL=http://ftp.gnu.org/gnu/freefont/$(FREEFONT_FILE)
 FREEFONT_TGZ=$(DL_DIR)/$(FREEFONT_FILE)
 
 fonts:
-	[ -e $(FREEFONT_TGZ) ] || (echo -e "Please download $(FREEFONT_URL) to $(DL_DIR)" ; exit 1)
-	mkdir -p $(BUILD_DIR)
+	@[ -e $(FREEFONT_TGZ) ] || (echo -e "Please download $(FREEFONT_URL) to $(DL_DIR)" ; exit 1)
+	@mkdir -p $(BUILD_DIR)
 	tar -zxf $(FREEFONT_TGZ) -C $(BUILD_DIR)
 
 
@@ -82,7 +90,7 @@ FREETYPE_DEFS=-I$(FREETYPE_DIR)/include
 FREETYPE_LIB=$(FREETYPE_DIR)/objs/.libs/libfreetype.a
 
 $(FREETYPE_LIB):
-	mkdir -p $(BUILD_DIR)
+	@mkdir -p $(BUILD_DIR)
 	tar -zxf $(FREETYPE_TGZ) -C $(BUILD_DIR)
 	cd $(FREETYPE_DIR) && CFLAGS="$(CFLAGS_COMMON)" CC=$(CC) ./configure --without-bzip2 --disable-shared --host i686-linux
 	cd $(FREETYPE_DIR) && $(MAKE)
@@ -99,7 +107,7 @@ ZLIB_DIR=$(BUILD_DIR)/zlib-$(ZLIB_VER)
 ZLIB_LIB=$(ZLIB_DIR)/libz.a
 
 $(ZLIB_LIB):
-	mkdir -p $(BUILD_DIR)
+	@mkdir -p $(BUILD_DIR)
 	tar -zxf $(ZLIB_TGZ) -C $(BUILD_DIR)
 	cd $(ZLIB_DIR) && CFLAGS="$(CFLAGS_COMMON)" CC=$(CC) ./configure --static
 	cd $(ZLIB_DIR) && $(MAKE)
@@ -121,7 +129,7 @@ MXML_DIR=$(BUILD_DIR)/mxml-$(MXML_VER)
 MXML_LIB=$(MXML_DIR)/libmxml.a
 
 $(MXML_LIB):
-	mkdir -p $(BUILD_DIR)
+	@mkdir -p $(BUILD_DIR)
 	tar -zxf $(MXML_TGZ) -C $(BUILD_DIR)
 	cd $(MXML_DIR) && CFLAGS="$(CFLAGS_COMMON)" CC=$(CC) ./configure --host i686-linux
 	cd $(MXML_DIR) && $(MAKE) libmxml.a
@@ -134,7 +142,7 @@ mxml_clean:
 
 #################### OcherBook
 
-OCHER_CFLAGS+=-I. -DSINGLE_THREADED
+OCHER_CFLAGS+=-I. -Ibuild -DSINGLE_THREADED
 OCHER_CFLAGS+=$(INCS) $(FREETYPE_DEFS)
 ifeq ($(OCHER_DEBUG),1)
 	OCHER_CFLAGS+=-DCLC_LOG_LEVEL=5
@@ -241,22 +249,37 @@ endif
 OCHER_OBJS += \
 	ocher/output/FreeType.o
 
-$(OCHER_OBJS): ocher.config Makefile
+$(OCHER_OBJS): Makefile ocher.config $(BUILD_DIR)/ocher_config.h
+
+$(BUILD_DIR)/ocher_config.h: Makefile ocher.config
+CONFIG_BOOL=OCHER_DEV OCHER_DEBUG OCHER_AIRBAG_FD OCHER_EPUB OCHER_TEXT OCHER_HTML OCHER_UI_FD OCHER_UI_NCURSES OCHER_UI_SDL OCHER_UI_MX50
+ocher_config_clean:
+	@echo "CONFIG	ocher_config.h"
+	@mkdir -p $(BUILD_DIR)
+	@rm -f $(BUILD_DIR)/ocher_config.h
+OCHER_%:
+	@([ "$(OCHER_$*)" = "1" ] && echo "#define OCHER_$* 1" || echo "/* OCHER_$* */") >> $(BUILD_DIR)/ocher_config.h
+$(BUILD_DIR)/ocher_config.h: ocher_config_clean $(CONFIG_BOOL)
 
 #ODIR=obj
 #OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 .c.o:
-	$(CC) --std=c99 -c $(CFLAGS) $(OCHER_CFLAGS) $*.c -o $@
+	$(MSG) "CC	$*.c"
+	$(QUIET)$(CC) --std=c99 -c $(CFLAGS) $(OCHER_CFLAGS) $*.c -o $@
 
 .cpp.o:
-	$(CXX) -c $(CFLAGS) $(OCHER_CFLAGS) $*.cpp -o $@
+	$(MSG) "CXX	$*.cpp"
+	$(QUIET)$(CXX) -c $(CFLAGS) $(OCHER_CFLAGS) $*.cpp -o $@
 
 ocher: $(BUILD_DIR)/ocher
 $(BUILD_DIR)/ocher: $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB) $(OCHER_OBJS)
-	$(CXX) $(LD_FLAGS) $(CFLAGS) $(OCHER_CFLAGS) -o $@ $(OCHER_OBJS) $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB) -ldl
+	$(MSG) "LINK	$<"
+	$(QUIET)$(CXX) $(LD_FLAGS) $(CFLAGS) $(OCHER_CFLAGS) -o $@ $(OCHER_OBJS) $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB) -ldl
+	@echo
+	@echo "Binary is at $@"
 
-clean: zlib_clean freetype_clean mxml_clean
+clean: zlib_clean freetype_clean mxml_clean ocher_config_clean
 	rm -f $(OCHER_OBJS) $(BUILD_DIR)/ocher
 
 unittestpp:
@@ -268,7 +291,7 @@ test: unittestpp ocher ochertest
 	# TODO
 
 dist: ocher
-	tar -C build -Jcf ocher-`uname -s`-$(OCHER_MAJOR).$(OCHER_MINOR).$(OCHER_PATCH).tar.xz ocher
+	tar -C $(BUILD_DIR) -Jcf ocher-`uname -s`-$(OCHER_MAJOR).$(OCHER_MINOR).$(OCHER_PATCH).tar.xz ocher
 
 dist-src: clean
 	git status clc dl doc ocher
