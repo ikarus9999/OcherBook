@@ -79,19 +79,17 @@ public:
     int y;
     int attr;
 
+    void clear();
     void refresh();
     void getMaxXY(int& x, int& y);
     void gotoXY(int x, int y);
 
+    void mvAddNStr(int x, int y, const char* str, int n);
+    void addCh(char c);
     void printw(const char* fmt, ...);
     void changeAttr(int a);
     void chAttr(int x, int y);
     void clearToEol();
-
-    /**
-     * Waits until a keystroke or mouse click occurs.
-     */
-    Keystroke getKey(Keystroke::Modifiers *mod = 0);
 
     virtual void repaint() {}
 
@@ -139,6 +137,12 @@ public:
     void cursor(bool cursorOn);
 
     WINDOW* mainWindow();
+
+    /**
+     * Waits until a keystroke or mouse click occurs.
+     */
+    static Keystroke getKey(Keystroke::Modifiers *mod = 0);
+
 };
 
 }

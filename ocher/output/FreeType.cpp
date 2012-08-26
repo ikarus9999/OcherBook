@@ -1,3 +1,5 @@
+#include <ctype.h>
+
 #include "ocher/device/Device.h"
 #include "ocher/output/FreeType.h"
 #include "ocher/output/FrameBuffer.h"
@@ -15,7 +17,7 @@ FreeType::FreeType(FrameBuffer *fb) :
     }
 
     r = FT_New_Face(m_lib, "build/freefont-20120503/FreeSans.otf", 0, &m_face);
-    if (r) {
+    if (r || !m_face) {
         clc::Log::error("ocher.freetype", "FT_New_Face failed: %d", r);
     }
 }
@@ -27,7 +29,7 @@ void FreeType::setSize(unsigned int points)
 
 // TODO:  how slow is this?  Might be worth caching rendered words (per
 // face/size)
-bool FreeType::renderGlyph(int c, int *penX, int *penY)
+bool FreeType::renderGlyph(int c, bool doBlit, int penX, int penY, int *dx, int *dy, int *height)
 {
     FT_GlyphSlot slot = m_face->glyph;
     unsigned int glyphIndex = FT_Get_Char_Index(m_face, c);
@@ -44,14 +46,18 @@ bool FreeType::renderGlyph(int c, int *penX, int *penY)
         }
     }
 
-    printf("%u %d %d %d %d\n", c, m_face->glyph->bitmap_left,
-            m_face->glyph->bitmap_top, m_face->glyph->bitmap.width, m_face->glyph->bitmap.rows);
-    m_fb->blit(m_face->glyph->bitmap.buffer, *penX + m_face->glyph->bitmap_left,
-            *penY - m_face->glyph->bitmap_top, m_face->glyph->bitmap.width,
-            m_face->glyph->bitmap.rows);
+    if (doBlit) {
+        //printf("%u(%c) %d %d %d %d\n", c, isprint(c) ? c : '?',
+        //        m_face->glyph->bitmap_left, m_face->glyph->bitmap_top,
+        //        m_face->glyph->bitmap.width, m_face->glyph->bitmap.rows);
+        m_fb->blit(m_face->glyph->bitmap.buffer, penX + m_face->glyph->bitmap_left,
+                penY - m_face->glyph->bitmap_top, m_face->glyph->bitmap.width,
+                m_face->glyph->bitmap.rows);
+    }
 
-    *penX += slot->advance.x >> 6;
-    *penY += slot->advance.y >> 6;
+    *dx = slot->advance.x >> 6;
+    *dy = slot->advance.y >> 6;
+    *height = m_face->size->metrics.height >> 6;
     return true;
 }
 

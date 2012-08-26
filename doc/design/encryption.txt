@@ -1,0 +1,9 @@
+All encryption is done with AES-128-CBC, with the randomly-chosen IV prepended
+to the encrypted bytes.
+
+If it all goes to hell in a handbasket, you should be able to decrypt your
+files using OpenSSL:
+```shell
+$ openssl enc -aes-128-cbc -d -in ~/.OcherBook/record -out my-reading
+```
+

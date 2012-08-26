@@ -13,6 +13,8 @@ public:
     UiFactoryFb(FrameBuffer *fb);
     ~UiFactoryFb() {}
 
+    bool init();
+    void deinit();
     Browse& getBrowser();
     Renderer& getRenderer();
 

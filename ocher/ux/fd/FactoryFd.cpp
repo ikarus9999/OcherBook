@@ -14,6 +14,10 @@ bool UiFactoryFd::init()
     return m_browser.init() && m_renderer.init();
 }
 
+void UiFactoryFd::deinit()
+{
+}
+
 const char* UiFactoryFd::getName()
 {
     return "fd";

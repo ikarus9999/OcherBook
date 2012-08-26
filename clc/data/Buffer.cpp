@@ -152,6 +152,9 @@ public:
     { return fSize; }
 
 private:
+    PosVect(const PosVect&);  // unimplemented; disallowed
+    PosVect& operator=(const PosVect&);  // unimplemented; disallowed
+
     size_t  fSize;
     size_t  fBufferSize;
     size_t* fBuffer;

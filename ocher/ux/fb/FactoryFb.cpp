@@ -8,6 +8,15 @@ UiFactoryFb::UiFactoryFb(FrameBuffer *fb) :
 {
 }
 
+bool UiFactoryFb::init()
+{
+    return true;
+}
+
+void UiFactoryFb::deinit()
+{
+}
+
 Browse& UiFactoryFb::getBrowser()
 {
     return m_browser;

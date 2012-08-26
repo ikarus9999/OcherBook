@@ -3,24 +3,27 @@
 
 #include "ocher/ux/Renderer.h"
 
+
 class RendererFd : public Renderer
 {
 public:
     RendererFd();
 
     bool init();
-    void render(unsigned int pageNum);
+    int render(unsigned int pageNum, bool doBlit);
 
     void setWidth(int width);
-    void outputWrapped(clc::Buffer *b);
+    int outputWrapped(clc::Buffer *b, unsigned int strOffset, bool doBlit);
 
 protected:
     int m_fd;
     int m_width;
+    int m_height;
     int m_x;
     int m_y;
     int m_page;
 
+    void clearScreen();
     void enableUl();
     void disableUl();
     void enableEm();

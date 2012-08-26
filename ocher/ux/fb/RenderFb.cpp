@@ -6,7 +6,7 @@
 #include "ocher/fmt/Layout.h"
 #include "ocher/output/FreeType.h"
 #include "ocher/output/FrameBuffer.h"
-#include "ocher/settings/Options.h"
+#include "ocher/settings/Settings.h"
 #include "ocher/ux/fb/RenderFb.h"
 
 
@@ -14,8 +14,9 @@ RenderFb::RenderFb(FreeType *ft, FrameBuffer *fb) :
     m_ft(ft),
     m_fb(fb),
     m_col(0),
-    m_penX(0),
-    m_penY(20),  //TODO
+    m_penX(settings.marginLeft),
+    m_penY(settings.marginTop),
+    m_lineHeight(10),
     m_page(1),
     ai(1)
 {
@@ -23,7 +24,7 @@ RenderFb::RenderFb(FreeType *ft, FrameBuffer *fb) :
 
 bool RenderFb::init()
 {
-    m_ft->setSize(12);
+    m_ft->setSize(settings.fontPoints);
     return true;
 }
 
@@ -38,14 +39,22 @@ void RenderFb::popAttrs()
     ai--;
 }
 
-void RenderFb::outputWrapped(clc::Buffer *b)
+int RenderFb::outputWrapped(clc::Buffer *b, unsigned int strOffset, bool doBlit)
 {
+    int dx, dy;
     int len = b->size();
-    const char *p = b->data();
+    const unsigned char *start = (const unsigned char*)b->data();
+    const unsigned char *p = start;
+
+    ASSERT(strOffset <= len);
+    len -= strOffset;
+    p += strOffset;
+
+    // TODO:  first time on a page, must penY+= bearingY of current face
+    // TODO:  proper word wrap
+    // TODO:  paginate
 
     int width = m_fb->width();
-    // TODO: a complete hack of an approximation of # of char on a line
-    int w = width / 8;
     do {
         // If at start of line, eat spaces
         if (m_col == 0) {
@@ -55,57 +64,96 @@ void RenderFb::outputWrapped(clc::Buffer *b)
             }
         }
 
-#if 1
-        // How many chars should go out on this line?
-        const char *nl = 0;
-        int n = w;
-        if (w >= len) {
-            n = len;
-            nl = (const char *)memchr(p, '\n', n);
-        } else {
-            nl = (const char *)memchr(p, '\n', n);
-            if (!nl) {
-                // don't break words
-                if (!isspace(*(p+n-1)) && !isspace(*(p+n))) {
-                    char *space = (char*)memrchr(p, ' ', n);
-                    if (space) {
-                        nl = space;
+        if (*p != '\n') {
+            // Where is the next word break?
+            const unsigned char *end = p;
+            while (*end && !isspace(*end)) {
+                ++end;
+            }
+            if (*end)
+                ++end;
+
+            for ( ; p < end; ++p, --len) {
+                uint32_t c = *p;
+                if (c > 0x7f) {
+                    // Convert UTF8 to UTF32, as required by FreeType
+                    if ((c & 0xe0) == 0xc0) {
+                        c = ((c & 0x1f) << 6) | (p[1] & 0x3f);
+                        p += 1;
+                        len -= 1;
+                    } else if ((c & 0xf0) == 0xe0) {
+                        c = ((c & 0x0f) << 12) | ((p[1] & 0x3f) << 6) | (p[2] & 0x3f);
+                        p += 2;
+                        len -= 2;
+                    } else if ((c & 0xf8) == 0xf0) {
+                        c = ((c & 0x07) << 18) | ((p[1] & 0x3f) << 12) | ((p[2] & 0x3f) << 6) | (p[3] & 0x3f);
+                        p += 3;
+                        len -= 3;
+                    } else if ((c & 0xfc) == 0xf8) {
+                        c = ((c & 0x03) << 24) | ((p[1] & 0x3f) << 18) | ((p[2] & 0x3f) << 12) | ((p[3] & 0x3f) << 6) | (p[4] & 0x3f);
+                        p += 4;
+                        len -= 4;
+                    } else if ((c & 0xfe) == 0xfc) {
+                        c = ((c & 0x01) << 30) | ((p[1] & 0x3f) << 24) | ((p[2] & 0x3f) << 18) | ((p[3] & 0x3f) << 12) | ((p[4] & 0x3f) << 6) | (p[5] & 0x3f);
+                        p += 5;
+                        len -= 5;
+                    } else {
+                        // out of sync?
+                        continue;
                     }
                 }
+
+                // TODO:  probably have to move the freetype stuff inline here
+                // for proper wordwrap
+                if (m_ft->renderGlyph(c, doBlit, m_penX, m_penY, &dx, &dy, &m_lineHeight)) {
+                    m_penX += dx;
+                    m_penY += dy;
+                }
+                if (m_penX >= width-1 - settings.marginRight) {
+                    ++p;
+                    --len;
+                    break;
+                }
+                m_col ++;
             }
         }
-        if (nl)
-            n = nl - p;
-#endif
 
-        for (int i = 0; i < n; ++i) {
-            // TODO: UTF32
-            m_ft->renderGlyph(p[i], &m_penX, &m_penY);
-            m_col ++;
-        }
-
-        p += n;
-        len -= n;
-        m_penX += n;
-        if (nl || m_penX >= width-1) {
-            //write(m_fd, "\n", 1);
-            m_penX = 0;
-            m_penY += 20;  // TODO
-            if (nl) {
+        if (*p == '\n' || m_penX >= width-1 - settings.marginRight) {
+            m_penX = settings.marginLeft;
+            m_penY += m_lineHeight;
+            m_col = 0;
+            if (*p == '\n') {
                 p++;
                 len--;
             }
+            if (m_penY > (int)m_fb->height()) {
+                return p - start;
+            }
         }
     } while (len > 0);
+    return -1;  // think of this as "failed to cross page boundary"
 }
 
-void RenderFb::render(unsigned int pageNum)
+int RenderFb::render(unsigned int pageNum, bool doBlit)
 {
-    (void)pageNum;  // TODO:  render the requested page, not everything
+    m_penX = settings.marginLeft;
+    m_penY = settings.marginTop;
+
+    unsigned int layoutOffset;
+    unsigned int strOffset;
+    if (!pageNum) {
+        layoutOffset = 0;
+        strOffset = 0;
+    } else if (! m_pagination.get(pageNum-1, &layoutOffset, &strOffset)) {
+        // Previous page not already paginated?
+        // Perhaps at end of book?
+        return -1;
+    }
 
     const unsigned int N = m_layout.size();
     const char *raw = m_layout.data();
-    for (unsigned int i = 0; i < N; ) {
+    ASSERT(layoutOffset < N);
+    for (unsigned int i = layoutOffset; i < N; ) {
         ASSERT(i+2 <= N);
         uint16_t code = *(uint16_t*)(raw+i);
         i += 2;
@@ -171,9 +219,17 @@ void RenderFb::render(unsigned int pageNum)
                         clc::Log::debug("ocher.render.fb", "OpCmd CmdOutputStr");
                         ASSERT(i + sizeof(clc::Buffer*) <= N);
                         clc::Buffer *str = *(clc::Buffer**)(raw+i);
+                        ASSERT(strOffset <= str->size());
+                        int breakOffset = outputWrapped(str, strOffset, doBlit);
+                        strOffset = 0;
+                        if (breakOffset >= 0) {
+                            if (!doBlit) {
+                                m_pagination.set(pageNum, i-2, breakOffset);
+                            }
+                            m_fb->update(0, 0, m_fb->width(), m_fb->height(), false); // DDD
+                            return 0;
+                        }
                         i += sizeof(clc::Buffer*);
-                        outputWrapped(str);
-                        m_fb->update(0, 0, m_fb->width(), m_fb->height(), false); // DDD
                         break;
                     }
                     case Layout::CmdForcePage:
@@ -193,7 +249,8 @@ void RenderFb::render(unsigned int pageNum)
                 clc::Log::error("ocher.render.fb", "unknown op type");
                 ASSERT(0);
                 break;
-
         };
     }
+    m_fb->update(0, 0, m_fb->width(), m_fb->height(), false); // DDD
+    return 1;
 }

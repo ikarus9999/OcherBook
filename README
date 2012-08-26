@@ -5,7 +5,7 @@ expediency it may reuse the existing kernel on ereaders.
 
 To get started, look in the doc directory, and/or "make help".
 
-To see what platforms are supported and to what degree, see doc/PLATFORMS.
+To see what platforms are supported and to what degree, look in doc/platforms/.
 
 See also:
 OcherBook                   http://ccoffing.net/tech/proj/ocherbook

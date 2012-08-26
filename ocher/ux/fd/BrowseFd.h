@@ -11,6 +11,7 @@ public:
 
     bool init();
     void browse();
+    void read(Renderer& renderer);
 
 protected:
     int m_in;

@@ -6,10 +6,11 @@ expediency it may reuse the existing kernel on ereaders.
 
 Technology is hard to push back against.  Books are/will be moving to
 electronic.  But what problems does that pose?
-    - privacy
-    - control
-    - accessibility
-    - reliability
+    - Privacy
+    - Control
+    - Accessibility
+    - Reliability
+
 
 How does OcherBook handle these issues?
 
@@ -18,30 +19,30 @@ Privacy:
     - Open source
     - No tracking / cloud / FB integration / etc
     - Encryption
-        - of personal reading record / notes
+        - Of personal reading record / notes
         - ...
 
 Control:
     - All local, no cloud
-    - no DRM
+    - No DRM
+        - You can read whatever, whenever
+        - Your books cannot be removed by 3rd party
     - Ability to import / export your reading record / notes / etc
 
-Accessibility:
+Accessibility: How do we enjoy e-books without creating a new dark age?
+(Consider DRM, technological obsolescence, peak oil, ...)
     - All local, no cloud
-    - multiple architectures
-    - multiple output devices
-    - low resource requirements / low power
-    - support new and old tech
+    - Multiple architectures
+    - Multiple output devices
+    - Support new and old tech
+    - Low resource requirements / low power
+    - Archiving is still the user's problem...
+        - Or is there a server side?
+    - Background:
+        http://traffic.libsyn.com/kunstlercast/KunstlerCast_201.mp3
 
 Reliability:
-    - books do not crash or hang
+    - Books do not crash or hang
+        - Mass stress-test against real world library
 
-
-How do we enjoy e-books without creating a new dark age?  (Consider DRM,
-technological obsolescence, peak oil, ...)
-    - discourage DRM
-    - support low power (Raspberry Pi?)
-    - support old tech
-    - archiving is still the user's problem...
-        - or is there a server side?
 

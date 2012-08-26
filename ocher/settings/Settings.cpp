@@ -3,38 +3,56 @@
 #include "ocher/device/Filesystem.h"
 #include "ocher/settings/Settings.h"
 
+Settings settings;
 
-void initSettings()
-{
-}
 
 Settings::Settings() :
-    minutesUntilSleep(15)
-    minutesUntilSleep(60)
+    trackReading(0),
+    encryptReading(1),
+    minutesUntilSleep(15),
+    sleepShowBook(1),
+    minutesUntilPowerOff(60),
+    wirelessAirplaneMode(0),
+    fullRefreshPages(6),
+    showPageNumbers(1),
+    fontPoints(12),
+    marginTop(10),
+    marginBottom(10),
+    marginLeft(10),
+    marginRight(10)
 {
 }
 
 void Settings::load()
 {
-    // TODO: handle exceptions
+    clc::File s;
+    try {
+        s.setTo(fs.getSettings());
+    } catch(...) {
+        return;
+    }
 
-    clc::Buffer settings = Filesystem::getOcherRoot();
-    clc::Path::join(settings, "settings");
-    clc::File s(settings);
     clc::Buffer line;
-
     while (!s.isEof()) {
         line = s.readLine(false, 1024);
 
         const char *p = line.c_str();
         size_t n = line.size();
 
+        // TODO
     }
 }
 
 void Settings::save()
 {
-    clc::Buffer settings = Filesystem::getOcherRoot();
-    clc::Path::join(settings, "settings");
-    clc::File s(settings, "w");
+    clc::File s(fs.getSettings(), "w");
+
+    clc::Buffer b;
+
+    b.format("MinutesUntilSleep=%u\n", minutesUntilSleep);
+    s.write(b);
+    b.format("MinutesUntilPowerOff=%u\n", minutesUntilPowerOff);
+    s.write(b);
+    b.format("TrackReading=%u\n", trackReading ? 1 : 0);
+    s.write(b);
 }

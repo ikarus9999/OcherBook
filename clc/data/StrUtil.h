@@ -82,9 +82,8 @@ namespace str
 
     /**
      *  Parses an unsigned integer.
-     *  @throw BufferUnderflowException  If no parsable number was found.
      */
-    uint64_t toUInt(Buffer const& s);
+    uint64_t toUInt(Buffer const& s, bool *valid=0);
 
     /**
      *  Retrieves a line from a string.  Common usage is to loop, incrementing fromOffset each time

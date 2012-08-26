@@ -20,7 +20,7 @@ public:
 
     void clear();
     void blit(unsigned char *p, int x, int y, int w, int h);
-    int update(int x, int y, int w, int h, bool full);
+    int update(int x, int y, int w, int h, bool full=true);
 
 protected:
     SDL_Surface *m_screen;

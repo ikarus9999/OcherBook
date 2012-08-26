@@ -1,42 +1,43 @@
-0.0:
-+ rough structure, research, dreaming
+0.0.8
+event loop
+    SDL event loop vs
+"N of M" for fd and ncurses paging
 
-0.1:  
-+ reliably output text and epub (limited) via fd UI
-    + layout architecture
-        + layout
-            + converts from various file formats to standard in-memory format
-                - including applying CSS, canonicalizations, ...
-        + render:  
-            + consumes layout bytecode
-- device
-    - filesystem abstraction
-- more application framework
-    - controller:  workflow (via fd)
-- more kobo research
-    + cross-compile fd-only build to run on kobo
-    - research framebuffer
-        - freetype build on kobo is broken
-        - see ReaderZ
+0.0.9
+factory init/deinit vs new/delete
+check build on multiple platforms
+legible kobo
 
-0.2:
-- improve fd renderer: paginate, margins, ...
-- crashes...
-    - airbagfd
-    - harden over many epubs
-- more kobo research
-    - framebuffer driven by FreeType
 
-0.3:
-- improved css
 
+
+device specific:
+    - abstractions:
+        - filesystem
+    - Kobo:
+        - framebuffer
+        - suspend / resume
+        - touch input
+        - home, power button
+
+workflow:
+
+layout:
+    - pagination
+    - margins
+    - FreeType:
+        - integrate into RenderFd for real word wrap
 
 build system:
+    - config system
     - modularize
     - detect platform, etc...
     - download tool
+    - include kobo linux headers, for easier build
 
 renderers:
+    - user able to interrupt any long-running layout action
+        - SDL seems to block signals by default
     - fd
     - ncurses
     - sdl
@@ -44,42 +45,61 @@ renderers:
     - ...
 
 formats:
+    - probe file type
     - epub
+        - CSS
     - text
     - ...
 
 per-user:
+    - all user record with optional OpenSSL-compatible encryption
     - keep personal log of books read (title, author, date, notes, ...)?
     - ability to export per-use stats
     - annotations
     - settings
         - fonts
+        - past settings (these settings suck, want to undo)
+        - ability to force settings (book can't change margins, font size, ...)
+        - start / stop date of reading book
+        - way to share metadata about the book (tweet / ... ?)
 
-organization:
-    - consider separate use cases:
-        using ereader primarily vs synchronizing with server
-    - ways of grouping / searching (author, genre, read/haven't read, ...)
-    - how to attach metadata to each book?
+features:
+    - bookmarks
+    - annotations
+    - dictionary
+    - time / date / calendar view
+    - geek features:
+        - options to validate epubs?
+        - wirelessly sync with epubs on home server
+    - organization:
+        - consider separate use cases:
+            - using ereader primarily vs synchronizing with server
+        - ways of grouping / searching (author, genre, read/haven't read, ...)
+        - how to attach metadata to each book?
 
-better Makefile
-    - config system
-
-test:
+harden:
     - test harness
     - valgrind across many epubs
+    - airbag_fd
+
+cleanup:
+    - remove exceptions from File
+    - clean up Directory/Path/File to be simpler, more posix-like
 
 docs:
     - document complete walk-through of installing, recovery, etc
+    - built-in links to free ebooks?
 
-features:
-    - dictionary
-    - time / date / calendar view
+reader features:
+    - pan
+    - zoom
+    - flip
 
-geek features:
-    - options to validate epubs?
-    - wirelessly sync with epubs on home server
+metadata:
+    - cache metadata in dotfiles beside the epub
 
-move unzip stuff to libclc?
-
-quick way to pull out metadata - fast enough to not need a database like kobo?
+bluesky:
+    - RSS
+    - other free content
+    - ...
 

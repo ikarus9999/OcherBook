@@ -13,6 +13,7 @@ public:
     virtual ~UiFactoryFd() {}
 
     bool init();
+    void deinit();
     const char* getName();
     Browse& getBrowser();
     Renderer& getRenderer();

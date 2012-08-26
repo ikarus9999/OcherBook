@@ -1,6 +1,25 @@
 #ifndef LIBCLC_PATH_H
 #define LIBCLC_PATH_H
 
+#ifdef _WIN32
+
+#include <dirent>
+#define clc_mkdir(path, mode) ::_mkdir(path, mode)
+
+#else
+
+#define clc_statstruct stat
+#define clc_fstat(fd, statbuf) ::fstat(fd, statbuf)
+#define clc_stat(path, statbuf) ::stat(path, statbuf)
+#define clc_mkdir(path, mode) ::mkdir(path, mode)
+#define clc_rmdir(path) ::rmdir(path)
+#define clc_seek(fd, offset, whence) ::fseeko(fd, offset, whence)
+#define clc_tell(fd) ::ftello(fd)
+#define clc_unlink(pathname) ::unlink(pathname)
+
+#endif
+
+
 #include "clc/support/Flattenable.h"
 #include "clc/data/Buffer.h"
 #include "clc/data/List.h"
@@ -51,6 +70,13 @@ public:
     static int list(const char* directory, const char* glob, List& files);
 
     static Buffer getDirectory(Buffer &path);
+
+    /**
+     * Checks for the existence of a file or directory at the given path.
+     * @param path the path to check
+     * @return bool true if it exists, false otherwise
+     */
+    static bool exists(const char *path);
 
 #if 0
     Path();

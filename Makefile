@@ -1,38 +1,35 @@
+.PHONY: clean config test dist dist-src doc help
+
+# TODO:
+# conditionalize freetype, etc
+# header dependencies
+# move all objs to build/
+# obj-$(CONFIG_FOO) += foo.o
+# auto-detect platform
+# create config.h
+
+
 #################### Tuneables
-
-OCHER_MAJOR?=0
-OCHER_MINOR?=0
-OCHER_PATCH?=7
-
-TARGET?=posix
-
-OCHER_EPUB=1
-OCHER_TEXT=1
-OCHER_HTML=1
-OCHER_UI_FD?=1
-#OCHER_UI_SDL
-#OCHER_UI_MX50
 
 DL_DIR=dl
 BUILD_DIR=build
 
+include ocher.config
+
 
 #################### Platforms
 
-ifeq ($(TARGET),posix)
+ifeq ($(OCHER_TARGET),posix)
 	CC=gcc
 	CXX=g++
-	OCHER_UI_SDL?=1
 endif
-ifeq ($(TARGET),cygwin)
+ifeq ($(OCHER_TARGET),cygwin)
 	CC=gcc
 	CXX=g++
-	OCHER_UI_SDL?=1
 endif
-ifeq ($(TARGET),kobo)
+ifeq ($(OCHER_TARGET),kobo)
 	CC=$(PWD)/arm-2010q1/bin/arm-linux-gcc
 	CXX=$(PWD)/arm-2010q1/bin/arm-linux-g++
-	OCHER_UI_MX50?=1
 endif
 
 
@@ -40,22 +37,22 @@ endif
 
 # Common CFLAGS applied everywhere
 CFLAGS?=
-ifeq ($(DEBUG),1)
+ifeq ($(OCHER_DEBUG),1)
 	CFLAGS+=-g
 else
 	CFLAGS+=-Os -DNDEBUG
 endif
-ifeq ($(TARGET),cygwin)
+ifeq ($(OCHER_TARGET),cygwin)
 	CFLAGS+=-DUSE_FILE32API  # for minizip
 endif
-ifeq ($(TARGET),haiku)
+ifeq ($(OCHER_TARGET),haiku)
 	CFLAGS+=-DUSE_FILE32API  # for minizip
 endif
 CFLAGS_COMMON:=$(CFLAGS)
 
 # Additional CFLAGS for ocher
-OCHER_CFLAGS:=-W -Wall --include=clc/config.h -DOCHER_MAJOR=$(OCHER_MAJOR) -DOCHER_MINOR=$(OCHER_MINOR) -DOCHER_PATCH=$(OCHER_PATCH)
-ifeq ($(DEBUG),1)
+OCHER_CFLAGS:=-W -Wall -Wextra -Wformat=2 --include=clc/config.h -DOCHER_MAJOR=$(OCHER_MAJOR) -DOCHER_MINOR=$(OCHER_MINOR) -DOCHER_PATCH=$(OCHER_PATCH)
+ifeq ($(OCHER_DEV),1)
 	OCHER_CFLAGS+=-Werror
 endif
 OCHER_CFLAGS+=-Wno-unused  # TODO: only apply to minizip
@@ -132,24 +129,25 @@ $(MXML_LIB):
 INCS+=-I$(MXML_DIR)
 
 mxml_clean:
-	cd $(MXML_DIR) && $(MAKE) clean
+	cd $(MXML_DIR) && $(MAKE) clean || true
 
 
 #################### OcherBook
 
 OCHER_CFLAGS+=-I. -DSINGLE_THREADED
 OCHER_CFLAGS+=$(INCS) $(FREETYPE_DEFS)
-ifeq ($(DEBUG),1)
+ifeq ($(OCHER_DEBUG),1)
 	OCHER_CFLAGS+=-DCLC_LOG_LEVEL=5
 else
 	OCHER_CFLAGS+=-DCLC_LOG_LEVEL=2
 endif
-ifneq ($(TARGET),haiku)
+ifneq ($(OCHER_TARGET),haiku)
 	LD_FLAGS+=-lrt
 endif
-ifeq ($(OCHER_UI_SDL),1)
-	LD_FLAGS+=-lSDL
-endif
+LD_FLAGS+=$(OCHER_LIBS)
+#ifeq ($(OCHER_UI_SDL),1)
+#	LD_FLAGS+=-lSDL
+#endif
 
 OCHER_OBJS = \
 	clc/algorithm/Random.o \
@@ -158,8 +156,11 @@ OCHER_OBJS = \
 	clc/data/Hashtable.o \
 	clc/data/List.o \
 	clc/data/Set.o \
+	clc/data/StrUtil.o \
 	clc/os/Clock.o \
 	clc/os/Lock.o \
+	clc/os/Monitor.o \
+	clc/os/Thread.o \
 	clc/storage/File.o \
 	clc/storage/Path.o \
 	clc/support/Debug.o \
@@ -169,11 +170,19 @@ OCHER_OBJS = \
 	ocher/fmt/Layout.o \
 	ocher/fmt/Meta.o \
 	ocher/ocher.o \
+	ocher/settings/Settings.o \
 	ocher/ux/Browse.o \
 	ocher/ux/Controller.o \
+	ocher/ux/Pagination.o \
 	ocher/ux/Renderer.o \
-	ocher/ux/fb/RenderFb.o \
-	ocher/ux/fb/FactoryFb.o
+	ocher/ux/fb/BrowseFb.o \
+	ocher/ux/fb/FactoryFb.o \
+	ocher/ux/fb/RenderFb.o
+
+ifeq ($(OCHER_AIRBAG_FD),1)
+OCHER_OBJS += \
+	airbag_fd/airbag_fd.o
+endif
 
 ifeq ($(OCHER_EPUB),1)
 OCHER_OBJS += \
@@ -189,7 +198,7 @@ OCHER_OBJS += \
 	ocher/fmt/text/LayoutText.o
 endif
 
-ifeq ($(TARGET),kobo)
+ifeq ($(OCHER_TARGET),kobo)
 	OCHER_CFLAGS += \
 		-DTARGET_KOBO \
 		-DTARGET_KOBOTOUCH
@@ -198,8 +207,10 @@ endif
 ifeq ($(OCHER_UI_SDL),1)
 	OCHER_CFLAGS += -DOCHER_UI_SDL
 	OCHER_OBJS += \
+		ocher/input/SdlLoop.o \
 		ocher/output/sdl/FbSdl.o \
 		ocher/ux/fb/FactoryFbSdl.o
+	OCHER_LIBS += -lSDL
 endif
 
 ifeq ($(OCHER_UI_MX50),1)
@@ -220,33 +231,40 @@ endif
 ifeq ($(OCHER_UI_NCURSES),1)
 	OCHER_CFLAGS += -DOCHER_UI_NCURSES
 	OCHER_OBJS += \
+		clc/tui/Tui.o \
 		ocher/ux/ncurses/Browse.o \
-		ocher/ux/ncurses/Render.o \
-		ocher/ux/ncurses/Factory.o
+		ocher/ux/ncurses/RenderCurses.o \
+		ocher/ux/ncurses/FactoryNC.o
+	OCHER_LIBS += -lncurses -lform
 endif
 
 OCHER_OBJS += \
 	ocher/output/FreeType.o
 
+$(OCHER_OBJS): ocher.config Makefile
+
 #ODIR=obj
 #OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 .c.o:
-	$(CC) -c $(CFLAGS) $(OCHER_CFLAGS) $*.c -o $@
+	$(CC) --std=c99 -c $(CFLAGS) $(OCHER_CFLAGS) $*.c -o $@
 
 .cpp.o:
 	$(CXX) -c $(CFLAGS) $(OCHER_CFLAGS) $*.cpp -o $@
 
 ocher: $(BUILD_DIR)/ocher
 $(BUILD_DIR)/ocher: $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB) $(OCHER_OBJS)
-	$(CXX) $(LD_FLAGS) $(CFLAGS) $(OCHER_CFLAGS) -o $@ $(OCHER_OBJS) $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB)
+	$(CXX) $(LD_FLAGS) $(CFLAGS) $(OCHER_CFLAGS) -o $@ $(OCHER_OBJS) $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB) -ldl
 
 clean: zlib_clean freetype_clean mxml_clean
 	rm -f $(OCHER_OBJS) $(BUILD_DIR)/ocher
 
 unittestpp:
 
-test: unittestpp ocher
+ochertest:
+	# TODO
+
+test: unittestpp ocher ochertest
 	# TODO
 
 dist: ocher
@@ -256,30 +274,18 @@ dist-src: clean
 	git status clc dl doc ocher
 	tar -Jcf ocher-src-$(OCHER_MAJOR).$(OCHER_MINOR).$(OCHER_PATCH).tar.xz Makefile README clc dl doc ocher
 
-.PHONY: doc
-
 doc:
 	cd ocher && doxygen ../doc/Doxyfile
 
 help:
-	@echo "Environment variables:"
-	@echo ""
-	@echo "Configuration"
-	@echo "*	DEBUG=0		Release build"
-	@echo "	DEBUG=1		Enables logging, asserts, etc"
-	@echo "Target device or operating system"
-	@echo "*	TARGET=posix	Linux, BSD, etc"
-	@echo "	TARGET=cygwin"
-	@echo "	TARGET=haiku"
-	@echo "	TARGET=kobo"
+	@echo "Edit ocher.config with your desired settings, then 'make'."
 	@echo ""
 	@echo "Targets:"
-	@echo "	clean	Clean"
-	@echo "	fonts	Download GPL fonts"
-	@echo "*	ocher	Build the e-reader software"
-	@echo "	test	Unit tests"
-	@echo "	doc	Run Doxygen"
-	@echo "	dist	Build distribution packages"
-
-
+	@echo "	clean		Clean"
+	@echo "	fonts		Download GPL fonts"
+	@echo "*	ocher		Build the e-reader software"
+	@echo "	ochertest	Build the unit tests"
+	@echo "	test		Build and run the unit tests"
+	@echo "	doc		Run Doxygen"
+	@echo "	dist		Build distribution packages"
 

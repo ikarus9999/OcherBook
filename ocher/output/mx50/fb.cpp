@@ -170,7 +170,7 @@ int Mx50Fb::update(int x, int y, int w, int h, bool full)
     region.flags = 0;
 
     if (ioctl(m_fd, MXCFB_SEND_UPDATE, &region) == -1) {
-        perror("Error sending update information");
+        clc::Log::error("ocher.mx50", "MXCFB_SEND_UPDATE: %s", strerror(errno));
     }
     return m_marker;
 }
@@ -178,7 +178,7 @@ int Mx50Fb::update(int x, int y, int w, int h, bool full)
 void Mx50Fb::waitUpdate(int marker)
 {
     if (ioctl(m_fd, MXCFB_WAIT_FOR_UPDATE_COMPLETE, &marker) == -1) {
-        perror("Error waiting for update");
+        clc::Log::error("ocher.mx50", "MXCFB_WAIT_FOR_UPDATE_COMPLETE(%d): %s", marker, strerror(errno));
     }
 }
 
@@ -189,7 +189,7 @@ void Mx50Fb::setPixelFormat()
     screen_info.grayscale = GRAYSCALE_8BIT;
     int retval = ioctl(m_fd, FBIOPUT_VSCREENINFO, &screen_info);
     if (retval)
-        perror("ioctl FBIOPUT_VSCREENINFO");
+        clc::Log::error("ocher.mx50", "FBIOPUT_VSCREENINFO: %s", strerror(errno));
 }
 
 void Mx50Fb::setAutoUpdateMode(bool autoUpdate)
@@ -198,7 +198,7 @@ void Mx50Fb::setAutoUpdateMode(bool autoUpdate)
     mode = autoUpdate ? AUTO_UPDATE_MODE_AUTOMATIC_MODE : AUTO_UPDATE_MODE_REGION_MODE;
     int retval = ioctl(m_fd, MXCFB_SET_AUTO_UPDATE_MODE, &mode);
     if (retval)
-        perror("ioctl MXCFB_SET_AUTO_UPDATE_MODE");
+        clc::Log::error("ocher.mx50", "MXCFB_SET_AUTO_UPDATE_MODE(%d): %s", mode, strerror(errno));
 }
 
 void Mx50Fb::setUpdateScheme()
@@ -207,6 +207,6 @@ void Mx50Fb::setUpdateScheme()
 //    screen_info.scheme = UPDATE_SCHEME_SNAPSHOT;
     int retval = ioctl(m_fd, MXCFB_SET_UPDATE_SCHEME, &screen_info);
     if (retval)
-        perror("ioctl MXCFB_SET_UPDATE_SCHEME");
+        clc::Log::error("ocher.mx50", "MXCFB_SET__UPDATE_SCHEME: %s", strerror(errno));
 }
 
