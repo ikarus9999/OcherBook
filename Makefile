@@ -153,9 +153,6 @@ ifneq ($(OCHER_TARGET),haiku)
 	LD_FLAGS+=-lrt
 endif
 LD_FLAGS+=$(OCHER_LIBS)
-#ifeq ($(OCHER_UI_SDL),1)
-#	LD_FLAGS+=-lSDL
-#endif
 
 OCHER_OBJS = \
 	clc/algorithm/Random.o \
@@ -274,10 +271,8 @@ $(BUILD_DIR)/ocher_config.h: ocher_config_clean $(CONFIG_BOOL)
 
 ocher: $(BUILD_DIR)/ocher
 $(BUILD_DIR)/ocher: $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB) $(OCHER_OBJS)
-	$(MSG) "LINK	$<"
+	$(MSG) "LINK	$@"
 	$(QUIET)$(CXX) $(LD_FLAGS) $(CFLAGS) $(OCHER_CFLAGS) -o $@ $(OCHER_OBJS) $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB) -ldl
-	@echo
-	@echo "Binary is at $@"
 
 clean: zlib_clean freetype_clean mxml_clean ocher_config_clean
 	rm -f $(OCHER_OBJS) $(BUILD_DIR)/ocher
