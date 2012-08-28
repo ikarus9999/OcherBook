@@ -1,0 +1,9 @@
+Next planned release: 
+
+0.1.0
+- Compiles on Kobo, Linux, Haiku, Windows (via Cygwin)
+- Parses epub, text
+- Outputs to Kobo, SDL, ncurses, file descriptor
+- Rudimentary pagination of output
+- Rudimentary input to control next/prev page
+

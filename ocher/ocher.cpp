@@ -2,16 +2,27 @@
 #include <stdlib.h>
 #include <getopt.h>
 
+#include "airbag_fd/airbag_fd.h"
+
 #include "clc/support/Logger.h"
 #include "clc/support/LogAppenders.h"
 
+#include "ocher_config.h"
 #include "ocher/device/Device.h"
 #include "ocher/settings/Options.h"
+#include "ocher/settings/Settings.h"
 #include "ocher/ux/Controller.h"
 #include "ocher/ux/Factory.h"
 
 struct Options opt;
 
+
+void initCrash()
+{
+#ifdef OCHER_AIRBAG_FD
+    airbag_init_fd(2, 0);
+#endif
+}
 
 void initLog()
 {
@@ -34,6 +45,7 @@ void initLog()
 
 void initSettings()
 {
+    settings.load();
 }
 
 void usage(const char *msg)
@@ -85,7 +97,7 @@ int main(int argc, char **argv)
     };
 
     while (1) {
-        /* getopt_long stores the option index here. */
+        // getopt_long stores the option index here.
         int option_index = 0;
 
         int c = getopt_long(argc, argv, "d:fhtvq", long_options, &option_index);
@@ -118,6 +130,7 @@ int main(int argc, char **argv)
         }
     }
 
+    initCrash();
     initLog();
     initDevice();
     initSettings();
@@ -130,10 +143,10 @@ int main(int argc, char **argv)
             printf("\t%s\n", factory->getName());
         } else if (opt.driverName) {
             if (strcmp(factory->getName(), opt.driverName) == 0) {
-                driver = factory;
-                if (!driver->init()) {
+                if (!factory->init()) {
                     return 1;
                 }
+                driver = factory;
                 break;
             }
         } else {
@@ -151,6 +164,8 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    // TODO: error messages after this point must go to the driver, not stderr
+
     while (optind < argc) {
         // TODO  list
         opt.file = argv[optind++];
@@ -162,6 +177,7 @@ int main(int argc, char **argv)
 
     Controller c(driver);
     c.run();
+    driver->deinit();
 
     return 0;
 }

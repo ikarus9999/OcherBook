@@ -13,7 +13,6 @@ struct Options {
 
     int inFd;
     int outFd;
-
 };
 
 extern struct Options opt;

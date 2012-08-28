@@ -70,6 +70,21 @@ Window::~Window()
         delwin(w);
 }
 
+void Window::clear()
+{
+    wclear(w);
+}
+
+void Window::mvAddNStr(int x, int y, const char* str, int n)
+{
+    mvwaddnstr(w, y, x, str, n);
+}
+
+void Window::addCh(char c)
+{
+    waddch(w, c);
+}
+
 void Window::printw(const char* fmt, ...)
 {
     va_list ap;
@@ -110,7 +125,7 @@ void Window::refresh()
     ::wrefresh(w);
 }
 
-Keystroke Window::getKey(Keystroke::Modifiers* mod)
+Keystroke Tui::getKey(Keystroke::Modifiers* mod)
 {
     if (mod) {
         mod->m = 0;

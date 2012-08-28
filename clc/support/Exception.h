@@ -36,22 +36,23 @@ public:
     int err;
 };
 
-class IndexOutOfBoundsException : public Exception
-{
-public:
-    IndexOutOfBoundsException(char const* what="") throw() : Exception(what) {}
-};
-
 class BufferOverflowException : public Exception
 {
 public:
     BufferOverflowException(char const* what="") throw() : Exception(what) {}
 };
 
+#if 0
 class BufferUnderflowException : public Exception
 {
 public:
     BufferUnderflowException(char const* what="") throw() : Exception(what) {}
+};
+
+class IndexOutOfBoundsException : public Exception
+{
+public:
+    IndexOutOfBoundsException(char const* what="") throw() : Exception(what) {}
 };
 
 class UnsupportedOperationException : public Exception
@@ -77,7 +78,7 @@ class IllegalStateException : public Exception
 public:
     IllegalStateException(char const* what="") throw() : Exception(what) {}
 };
-
+#endif
 
 }
 

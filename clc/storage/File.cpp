@@ -9,6 +9,7 @@
 #include "clc/support/Debug.h"
 #include "clc/support/Exception.h"
 #include "clc/storage/File.h"
+#include "clc/storage/Path.h"
 #include "clc/algorithm/Random.h"
 
 #if defined(__linux__)
@@ -17,15 +18,6 @@
 #define UCLIBC_FTELL_BUG
 #endif
 
-// TODO _WIN32
-#define clc_statstruct stat
-#define clc_fstat(fd, statbuf) ::fstat(fd, statbuf)
-#define clc_stat(path, statbuf) ::stat(path, statbuf)
-#define clc_mkdir(path, mode) ::mkdir(path, mode)
-#define clc_rmdir(path) ::rmdir(path)
-#define clc_seek(fd, offset, whence) ::fseeko(fd, offset, whence)
-#define clc_tell(fd) ::ftello(fd)
-#define clc_unlink(pathname) ::unlink(pathname)
 #undef O_BINARY
 #define O_BINARY 0
 #define DEF_CREAT_MODE 0666
@@ -142,7 +134,7 @@ void File::init(const char *mode)
                         c += '0';
                     m_filename[len-1-i] = c;
                 }
-            } while (exists(m_filename.c_str()));
+            } while (Path::exists(m_filename.c_str()));
             fd = open(m_filename.c_str(), oflag, omode);
             if (fd < 0 && errno == EEXIST)
                 continue;
@@ -349,13 +341,7 @@ bool File::isEof() const
     return (feof(m_fd) > 0);
 }
 
-bool File::exists(const char *path)
-{
-    struct clc_statstruct statbuf;
-    int r = clc_stat(path, &statbuf);
-    return r == 0;
-}
-
+#if 0
 bool File::isDirectory(const char *path)
 {
     struct clc_statstruct statbuf;
@@ -383,19 +369,6 @@ int File::removePath(const char *path)
     return 0;
 }
 
-int File::mkdir(const char *path)
-{
-    int r = 0;
-    mode_t oldmask = umask((mode_t)0);
-    mode_t mode = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IXOTH;
-    r = clc_mkdir(path, mode);
-    if (r != 0) {
-        r = errno;
-    }
-    umask(oldmask);
-    return r;
-}
-
 int File::rename(const char *oldPath, const char *newPath)
 {
     int r = ::rename(oldPath, newPath);
@@ -403,6 +376,7 @@ int File::rename(const char *oldPath, const char *newPath)
         r = errno;
     return r;
 }
+#endif
 
 }
 

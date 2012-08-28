@@ -159,13 +159,7 @@ public:
      */
     bool isEof() const;
 
-    /**
-     * Checks for the existence of a file or directory at the given path.
-     * @param path the path to check
-     * @return bool true if it exists, false otherwise
-     */
-    static bool exists(const char *path);
-
+#if 0
     /**
      * Checks if the entry in the filesystem at the given path is a directory.
      * @param path the path to check
@@ -181,19 +175,13 @@ public:
     static int removePath(const char *path);
 
     /**
-     * Creates a directory at the specified path.  Does not create intermediate directories.
-     * @param path the path of the directory to create
-     * @return 0 or errno
-     */
-    static int mkdir(const char *path);
-
-    /**
      * Renames a file or directory at the given path.
      * @param oldPath the path to rename from
      * @param newPath the path to rename to
      * @return 0 or errno
      */
     static int rename(const char *oldPath, const char *newPath);
+#endif
 
 protected:
     void init(const char *mode);

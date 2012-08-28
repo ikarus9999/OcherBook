@@ -1,0 +1,3 @@
+[submodule "airbag_fd"]
+	path = airbag_fd
+	url = git@github.com:ccoffing/airbag_fd.git

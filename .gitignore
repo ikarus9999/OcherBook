@@ -1,6 +1,8 @@
 *.o
 *.d
-build
-.svn
+*.a
+build/
 test/*.epub
+test/*.txt
+.svn
 

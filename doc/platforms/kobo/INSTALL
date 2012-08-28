@@ -1,0 +1,80 @@
+# Overview #
+
+Currently, OcherBook is not a full replacement for the Kobo's firmware.  It
+is only intended to replace "nickel".  The Kobo's kernel, boot scripts, and
+wireless networking are left as-is.
+
+You'll want to enable FTP and telnet access to your Kobo, upload "ocher" and
+a font and an epub, telnet in, and run it.  Run with "-vv" to get some logging
+output to stderr.
+
+Notes on rooting your Kobo:
+http://ccoffing.net/tech/embedded/kobo/
+
+# Status #
+
+This is a work-in-progress.  For example:
+
+- margins and word-wrap not done
+- touch screen is not wired up; must control via telnet (press Enter for next
+  page, etc)
+- must upload a font manually; path must match what's compiled in
+- no file browser; must specify on command line
+- very slow to open large books because currently laying it all out when the
+  book is opened.
+
+# Walk-though #
+
+```
+$ chuck@server:~/git/src/kobo$ make
+...
+$ chuck@server:~/git/src/kobo$ ftp 192.168.1.68
+Connected to 192.168.1.68.
+220 Operation successful
+Name (192.168.1.68:chuck): root
+230 Operation successful
+Remote system type is UNIX.
+Using binary mode to transfer files.
+ftp> cd /tmp
+250 Operation successful
+ftp> lcd build
+Local directory now /pool/chuck/git/src/kobo/build
+ftp> put ocher
+local: ocher remote: ocher
+200 Operation successful
+150 Ok to send data
+226 Operation successful
+2564457 bytes sent in 1.28 secs (1963.5 kB/s)
+ftp> lcd freefont-20120503/
+Local directory now /pool/chuck/git/src/kobo/build/freefont-20120503
+ftp> put FreeSans.otf 
+local: FreeSans.otf remote: FreeSans.otf
+200 Operation successful
+150 Ok to send data
+226 Operation successful
+856800 bytes sent in 0.55 secs (1509.5 kB/s)
+ftp> quit
+221 Operation successful
+chuck@server:~/git/src/kobo$ telnet 192.168.1.68
+Trying 192.168.1.68...
+Connected to 192.168.1.68.
+Escape character is '^]'.
+
+(none) login: root
+[root@(none) /]# cd /tmp
+[root@(none) /tmp]# ./ocher  -vv pg37699.epub 
+08:03:40.713047 INFO  ocher.mx50 virtual 608x1792
+08:03:40.726022 INFO  ocher.epub.unzip extracting: mimetype
+08:03:40.727455 INFO  ocher.epub.unzip extracting: META-INF/container.xml
+08:03:40.729445 INFO  ocher.epub.unzip extracting: 37699/content.opf
+08:03:40.731184 INFO  ocher      Loading EPUB: pg37699.epub
+08:03:40.732728 INFO  ocher.epub.unzip extracting: 37699/wrap0000.html
+08:03:40.734645 INFO  ocher.epub.unzip extracting: 37699/www.gutenberg.org@files@37699@37699-h@37699-h-0.htm.html
+08:03:40.762975 WARN  ocher.epub Missing spine item #2
+08:03:40.896741 INFO  ocher      Paginated page 0
+08:03:40.955630 INFO  ocher      Paginated page 1
+08:03:41.215054 INFO  ocher      Paginated page 2
+```
+
+Enter for next page, ^C to end.
+

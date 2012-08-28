@@ -125,5 +125,12 @@ Buffer Path::getDirectory(Buffer &path)
     return dir;
 }
 
+bool Path::exists(const char *path)
+{
+    struct clc_statstruct statbuf;
+    int r = clc_stat(path, &statbuf);
+    return r == 0;
+}
+
 }
 

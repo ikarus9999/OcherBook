@@ -1,0 +1,7 @@
+Documentation can be plain text, but prefer "github flavored markdown".  This
+allows useful docs to be uploaded to GitHub easily.
+
+http://github.github.com/github-flavored-markdown/
+
+Wrap docs at column 79.
+

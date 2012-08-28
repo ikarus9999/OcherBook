@@ -1,0 +1,80 @@
+Targets
+=======
+
+Generally assume C99 support.  (Backfill as necessary on Windows.)
+
+Do not care to support DLLs on Windows (only static linking).  Why?
+- inlines are difficult (heaps are per DLL, etc)
+- export crap makes headers hard to read
+
+
+C++ Features
+============
+
+Minimal STL & templates; excessive STL bloats final binary
+
+Avoid "using".  Absolutely forbidden in headers to avoid namespace pollution.
+
+Avoid throwing exceptions
+- judicious use of bad_alloc and others in std ok
+- avoid others, for smaller code size
+
+
+Formatting
+==========
+
+4 space K&R
+
+Spacing helps denote difference between type and operator:
+```c++
+    char* c1, c2;
+    Foo& ref = orig;
+    Obj* ptr = &obj;
+```
+
+No extraneous parens around return val:
+```c++
+    return 123;
+```
+
+No extraneous inner space padding around parens, but spaces around keywords and
+most operators:
+```c++
+    for (int i = 0; i < N; i++) {
+        ...
+    }
+```
+
+
+Documentation
+=============
+
+Doxygen comments using /** */ form, Javadoc style, in headers.
+
+Minimal commenting in C files.  Block comments as necessary to explain why, but
+the what should be obvious (if not, rewrite).
+
+
+Naming
+======
+
+Naming scheme follows Java standard:
+MyClass, myMethod, MY_DEFINE, m_member, ...
+
+
+Debugging
+=========
+
+ASSERT contract; minimal or no runtime code to enforce it.  Fail early, fail hard.
+
+No printfs; use logging which can be compiled out.
+
+
+Headers
+=======
+
+System headers are <>, local headers are "".
+
+Include guards should be canonicalized form of the path.  Internal to the header, never external.
+
+

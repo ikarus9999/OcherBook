@@ -1,0 +1,32 @@
+How to paginate?
+================
+
+Users probably still expect page numbers.  But accurately calculating them is
+very slow (at least for framebuffers).
+
+Three options:
+
+* Accurately calculate the page numbers, for the user's font settings.  Very
+slow (minutes).  Even with caching of the layout, this is probably not
+realistic.
+* Statistical "pages".  Faster, but possibly confusing.  No one-to-one mapping
+between physical and logical pages, and book may end early or late.
+* Discard page numbers, and favor better navigation.  Difficult to retrain
+users, but faster and possibly more useful.
+
+
+Survey
+------
+
+Kobo seems to estimate the number of pages based on some statistical guess at
+how many characters fit on a page (probably assuming some common font size,
+etc).  For example, take two Kobos, set one to a large font size and the other
+to a small font size, and load the same (new!) book onto them.  They'll each
+say it has the same number of pages, regardless of your font size.  The actual
+end of the book has no relation to the claimed page numbers.
+
+
+Scrolling
+=========
+
+

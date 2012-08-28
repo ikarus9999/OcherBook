@@ -29,9 +29,10 @@ void Controller::run()
 
     clc::Buffer memLayout;
 
-    // TODO:  probe file type
     // TODO:  complete hardcoded hack to test with here...
+    // TODO:  probe file type
     // TODO:  rework Layout constructors to have separate init due to scoping
+
     Layout *layout;
     clc::File f(opt.file);
     char buf[2];
@@ -63,7 +64,17 @@ void Controller::run()
 
     Renderer& renderer = m_factory->getRenderer();
     renderer.set(memLayout);
-    renderer.render(1);
+
+    // Run through all pages without blitting to re-paginate
+    // TODO:  speed stats
+    // TODO:  faster? max_advance_width
+    for (int pageNum = 0; ; pageNum++) {
+        if (renderer.render(pageNum, false) != 0)
+            break;
+        clc::Log::info("ocher", "Paginated page %d", pageNum);
+    }
+
+    browser.read(renderer);
 
     delete layout;
 }

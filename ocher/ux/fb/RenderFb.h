@@ -13,8 +13,8 @@ public:
     RenderFb(FreeType *ft, FrameBuffer *fb);
 
     bool init();
-    void outputWrapped(clc::Buffer *b);
-    void render(unsigned int pageNum);
+    int outputWrapped(clc::Buffer *b, unsigned int strOffset, bool doBlit);
+    int render(unsigned int pageNum, bool doBlit);
 
 protected:
     FreeType *m_ft;
@@ -22,6 +22,7 @@ protected:
     int m_col;
     int m_penX;
     int m_penY;
+    int m_lineHeight;
     int m_page;
 
     void pushAttrs();

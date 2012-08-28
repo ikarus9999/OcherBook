@@ -6,12 +6,12 @@
 class BrowseFb : public Browse
 {
 public:
-    BrowseFb() {}
+    BrowseFb();
     ~BrowseFb() {}
 
-    bool init() { return true; }
-    void browse() {}
-
+    bool init();
+    void browse();
+    void read(Renderer& renderer);
 };
 
 #endif

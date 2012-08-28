@@ -123,7 +123,7 @@ void appendFormat(Buffer& s, const char* fmt, va_list argList)
     }
 }
 
-uint64_t toUInt(Buffer const& s)
+uint64_t toUInt(Buffer const& s, bool *valid)
 {
     uint64_t v = 0;
     size_t i = 0;
@@ -134,8 +134,9 @@ uint64_t toUInt(Buffer const& s)
         else
             break;
     }
-    if (i == 0)
-        throw BufferUnderflowException();
+    if (valid) {
+        *valid = (i > 0);
+    }
     return v;
 }
 

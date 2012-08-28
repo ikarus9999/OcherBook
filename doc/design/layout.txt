@@ -1,0 +1,49 @@
+20120702
+
+Considering layout versus rendering.  Want to convert to a common in-memory
+representation.  Epub starts out as mxml -- perhaps use that as a basis?  But
+overly verbose.  Many epubs are extremely verbose (Calibre's output, for
+example).  And seems excessive to try translate complex mxml to simpler, or to
+build mxml on top of text.  Already have a stupid HTML (mxml) walker that picks
+out relevant elements and outputs to the screen, and would be nearly trivial to
+do likewise for text.  Why not use that as a basis for generating my own
+in-memory format.  What subset do I care about?
+    * margins
+    * line spacing
+    * font
+    * bold
+    * italics
+    * indentation
+    * text wrap around images
+    * future:  math, ...
+
+Full-on DOM is overkill for now (that will likely to come back to bite me
+someday.)  Interested more in fast, reliable, portable output than all possible
+future features.
+
+The in-memory format should be canonicalized.  Crazy spacing collapsed, etc.
+The renderer should be dumb and fast.
+
+Is there a way to walk all epubs on the library and see what layout features
+they most commonly use?
+
+Representation:  Stack of text attributes.  Would be a stack of bounding boxes,
+but flowing around images complicates this.  Or would it be better for the
+representation to be a series of commands (bytecode)?  Again, keep the renderer
+fast and dumb.  But flowing around images, varying font sizes, etc. keep things
+dynamic.  The renderer is not just a stupid automaton.
+
+
+20120704
+
+Layout class:
+    - specialized per file-format
+    - outputs bytecode
+    - canonicalizes and validates
+
+Renderer class:
+    - specialized per device (kobo, fd, etc)
+    - mostly stupid, trusts bytecode for speed
+    - only "smartness" is that it understands the actual flow of text (line
+      height, images, etc)
+
