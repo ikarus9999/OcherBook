@@ -10,16 +10,23 @@
 FreeType::FreeType(FrameBuffer *fb) :
     m_fb(fb)
 {
+}
+
+bool FreeType::init()
+{
     int r;
     r = FT_Init_FreeType(&m_lib);
     if (r) {
         clc::Log::error("ocher.freetype", "FT_Init_FreeType failed: %d", r);
+        return false;
     }
 
-    r = FT_New_Face(m_lib, "build/freefont-20120503/FreeSans.otf", 0, &m_face);
+    r = FT_New_Face(m_lib, "FreeSans.otf", 0, &m_face);
     if (r || !m_face) {
         clc::Log::error("ocher.freetype", "FT_New_Face failed: %d", r);
+        return false;
     }
+    return true;
 }
 
 void FreeType::setSize(unsigned int points)

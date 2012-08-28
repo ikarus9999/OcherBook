@@ -174,6 +174,8 @@ void Epub::parseSpine(TreeFile* spineFile)
             }
         }
     }
+    if (tree)
+        mxmlDelete(tree);
 }
 
 int Epub::getSpineItemByIndex(unsigned int i, clc::Buffer &item)

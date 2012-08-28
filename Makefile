@@ -45,7 +45,7 @@ endif
 # Common CFLAGS applied everywhere
 CFLAGS?=
 ifeq ($(OCHER_DEBUG),1)
-	CFLAGS+=-g
+	CFLAGS+=-O1 -g
 else
 	CFLAGS+=-Os -DNDEBUG
 endif
@@ -57,13 +57,17 @@ ifeq ($(OCHER_TARGET),haiku)
 	CFLAGS+=-DUSE_FILE32API  # for minizip
 endif
 CFLAGS_COMMON:=$(CFLAGS)
+ifneq ($(OCHER_TARGET),haiku)
+	CFLAGS+=-std=c99
+endif
 
 # Additional CFLAGS for ocher
-OCHER_CFLAGS:=-W -Wall -Wextra -Wformat=2 --include=clc/config.h -DOCHER_MAJOR=$(OCHER_MAJOR) -DOCHER_MINOR=$(OCHER_MINOR) -DOCHER_PATCH=$(OCHER_PATCH)
+OCHER_CFLAGS=-Wall -W -Wformat=2 -Wno-write-strings
 ifeq ($(OCHER_DEV),1)
 	OCHER_CFLAGS+=-Werror
 endif
 OCHER_CFLAGS+=-Wno-unused  # TODO: only apply to minizip
+OCHER_CFLAGS+=-DOCHER_MAJOR=$(OCHER_MAJOR) -DOCHER_MINOR=$(OCHER_MINOR) -DOCHER_PATCH=$(OCHER_PATCH)
 
 default: ocher
 
@@ -187,6 +191,7 @@ OCHER_OBJS = \
 ifeq ($(OCHER_AIRBAG_FD),1)
 OCHER_OBJS += \
 	airbag_fd/airbag_fd.o
+OCHER_LIBS += -ldl
 endif
 
 ifeq ($(OCHER_EPUB),1)
@@ -203,14 +208,7 @@ OCHER_OBJS += \
 	ocher/fmt/text/LayoutText.o
 endif
 
-ifeq ($(OCHER_TARGET),kobo)
-	OCHER_CFLAGS += \
-		-DTARGET_KOBO \
-		-DTARGET_KOBOTOUCH
-endif
-
 ifeq ($(OCHER_UI_SDL),1)
-	OCHER_CFLAGS += -DOCHER_UI_SDL
 	OCHER_OBJS += \
 		ocher/input/SdlLoop.o \
 		ocher/output/sdl/FbSdl.o \
@@ -219,14 +217,12 @@ ifeq ($(OCHER_UI_SDL),1)
 endif
 
 ifeq ($(OCHER_UI_MX50),1)
-	OCHER_CFLAGS += -DOCHER_UI_MX50
 	OCHER_OBJS += \
 		ocher/output/mx50/fb.o \
 		ocher/ux/fb/FactoryFbMx50.o
 endif
 
 ifeq ($(OCHER_UI_FD),1)
-	OCHER_CFLAGS += -DOCHER_UI_FD
 	OCHER_OBJS += \
 		ocher/ux/fd/BrowseFd.o \
 		ocher/ux/fd/RenderFd.o \
@@ -234,7 +230,6 @@ ifeq ($(OCHER_UI_FD),1)
 endif
 
 ifeq ($(OCHER_UI_NCURSES),1)
-	OCHER_CFLAGS += -DOCHER_UI_NCURSES
 	OCHER_OBJS += \
 		clc/tui/Tui.o \
 		ocher/ux/ncurses/Browse.o \
@@ -250,29 +245,33 @@ $(OCHER_OBJS): Makefile ocher.config $(BUILD_DIR)/ocher_config.h
 
 $(BUILD_DIR)/ocher_config.h: Makefile ocher.config
 CONFIG_BOOL=OCHER_DEV OCHER_DEBUG OCHER_AIRBAG_FD OCHER_EPUB OCHER_TEXT OCHER_HTML OCHER_UI_FD OCHER_UI_NCURSES OCHER_UI_SDL OCHER_UI_MX50
+lc = $(subst A,a,$(subst B,b,$(subst C,c,$(subst D,d,$(subst E,e,$(subst F,f,$(subst G,g,$(subst H,h,$(subst I,i,$(subst J,j,$(subst K,k,$(subst L,l,$(subst M,m,$(subst N,n,$(subst O,o,$(subst P,p,$(subst Q,q,$(subst R,r,$(subst S,s,$(subst T,t,$(subst U,u,$(subst V,v,$(subst W,w,$(subst X,x,$(subst Y,y,$(subst Z,z,$1))))))))))))))))))))))))))
+uc = $(subst a,A,$(subst b,B,$(subst c,C,$(subst d,D,$(subst e,E,$(subst f,F,$(subst g,G,$(subst h,H,$(subst i,I,$(subst j,J,$(subst k,K,$(subst l,L,$(subst m,M,$(subst n,N,$(subst o,O,$(subst p,P,$(subst q,Q,$(subst r,R,$(subst s,S,$(subst t,T,$(subst u,U,$(subst v,V,$(subst w,W,$(subst x,X,$(subst y,Y,$(subst z,Z,$1))))))))))))))))))))))))))
 ocher_config_clean:
 	@echo "CONFIG	ocher_config.h"
 	@mkdir -p $(BUILD_DIR)
 	@rm -f $(BUILD_DIR)/ocher_config.h
+	@echo "#define OCHER_TARGET_$(call uc,$(OCHER_TARGET))" >> $(BUILD_DIR)/ocher_config.h
 OCHER_%:
 	@([ "$(OCHER_$*)" = "1" ] && echo "#define OCHER_$* 1" || echo "/* OCHER_$* */") >> $(BUILD_DIR)/ocher_config.h
 $(BUILD_DIR)/ocher_config.h: ocher_config_clean $(CONFIG_BOOL)
+# TODO: ocher_config_clean is PHONY, and OCHER_OBJS depened on it, so continual full rebuild...
 
 #ODIR=obj
 #OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 .c.o:
 	$(MSG) "CC	$*.c"
-	$(QUIET)$(CC) --std=c99 -c $(CFLAGS) $(OCHER_CFLAGS) $*.c -o $@
+	$(QUIET)$(CC) -c $(CFLAGS_COMMON) $(OCHER_CFLAGS) $*.c -o $@
 
 .cpp.o:
 	$(MSG) "CXX	$*.cpp"
-	$(QUIET)$(CXX) -c $(CFLAGS) $(OCHER_CFLAGS) $*.cpp -o $@
+	$(QUIET)$(CXX) -c $(CFLAGS_COMMON) $(OCHER_CFLAGS) $*.cpp -o $@
 
 ocher: $(BUILD_DIR)/ocher
 $(BUILD_DIR)/ocher: $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB) $(OCHER_OBJS)
 	$(MSG) "LINK	$@"
-	$(QUIET)$(CXX) $(LD_FLAGS) $(CFLAGS) $(OCHER_CFLAGS) -o $@ $(OCHER_OBJS) $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB) -ldl
+	$(QUIET)$(CXX) $(LD_FLAGS) $(CFLAGS_COMMON) $(OCHER_CFLAGS) -o $@ $(OCHER_OBJS) $(ZLIB_LIB) $(FREETYPE_LIB) $(MXML_LIB)
 
 clean: zlib_clean freetype_clean mxml_clean ocher_config_clean
 	rm -f $(OCHER_OBJS) $(BUILD_DIR)/ocher

@@ -11,7 +11,7 @@ class UiFactoryFb : public UiFactory
 {
 public:
     UiFactoryFb(FrameBuffer *fb);
-    ~UiFactoryFb() {}
+    virtual ~UiFactoryFb() {}
 
     bool init();
     void deinit();

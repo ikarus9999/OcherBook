@@ -25,7 +25,8 @@ Mx50Fb::Mx50Fb() :
     m_fd(-1),
     m_fb(0),
     m_fbSize(0),
-    m_marker(-1)
+    m_marker(-1),
+    m_clears(999)
 {
 }
 
@@ -83,12 +84,12 @@ fail:
 
 unsigned int Mx50Fb::height()
 {
-    return vinfo.yres_virtual;
+    return 800;
 }
 
 unsigned int Mx50Fb::width()
 {
-    return vinfo.xres_virtual;
+    return 600;
 }
 
 Mx50Fb::~Mx50Fb()
@@ -101,13 +102,31 @@ Mx50Fb::~Mx50Fb()
 
 void Mx50Fb::clear()
 {
-    memset(m_fb, 0, m_fbSize);
+    ++m_clears;
+    memset(m_fb, 0xff, m_fbSize);
+}
+
+static void invcpy(unsigned char *dst, unsigned char *src, size_t n)
+{
+#if 0
+    // Assuming src is word aligned.
+    // dst may not be aligned.
+
+#else
+    // TODO  invert then memcpy is total hack.  do it right:
+    // respect alignment, invert while copying.  (Or is it possible
+    // to have FreeType output inverted?)
+    for (size_t i = 0; i < n; ++i) {
+        src[i] = ~src[i];
+    }
+    memcpy(dst, src, n);
+#endif
 }
 
 void Mx50Fb::blit(unsigned char *p, int x, int y, int w, int h)
 {
     for (int i = 0; i < h; ++i) {
-        memcpy(((unsigned char*)m_fb) + y*width() + x, p, w);
+        invcpy(((unsigned char*)m_fb) + y*vinfo.xres_virtual + x, p, w);
         y++;
         p = p + w;
     }
@@ -157,10 +176,18 @@ void Mx50Fb::blit(unsigned char *p, int x, int y, int w, int h)
 
 int Mx50Fb::update(int x, int y, int w, int h, bool full)
 {
+    // TODO
+    if (m_clears > 5) {
+        m_clears = 0;
+        full = true;
+    } else {
+        full = false;
+    }
+
     struct mxcfb_update_data region;
 
-    region.update_region.top = y;
     region.update_region.left = x;
+    region.update_region.top = y;
     region.update_region.width = w;
     region.update_region.height = h;
     region.waveform_mode = WAVEFORM_MODE_AUTO;
@@ -170,7 +197,8 @@ int Mx50Fb::update(int x, int y, int w, int h, bool full)
     region.flags = 0;
 
     if (ioctl(m_fd, MXCFB_SEND_UPDATE, &region) == -1) {
-        clc::Log::error("ocher.mx50", "MXCFB_SEND_UPDATE: %s", strerror(errno));
+        clc::Log::error("ocher.mx50", "MXCFB_SEND_UPDATE(%d, %d, %d, %d, %d): %s",
+                x, y, w, h, m_marker, strerror(errno));
     }
     return m_marker;
 }

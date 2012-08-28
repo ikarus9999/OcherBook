@@ -15,7 +15,7 @@ Settings::Settings() :
     wirelessAirplaneMode(0),
     fullRefreshPages(6),
     showPageNumbers(1),
-    fontPoints(12),
+    fontPoints(10),
     marginTop(10),
     marginBottom(10),
     marginLeft(10),

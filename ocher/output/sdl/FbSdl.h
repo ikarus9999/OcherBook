@@ -10,7 +10,7 @@ class FbSdl : public FrameBuffer
 {
 public:
     FbSdl();
-    ~FbSdl();
+    virtual ~FbSdl();
 
     bool init();
 

@@ -24,6 +24,8 @@ RenderFb::RenderFb(FreeType *ft, FrameBuffer *fb) :
 
 bool RenderFb::init()
 {
+    if (! m_ft->init())
+        return false;
     m_ft->setSize(settings.fontPoints);
     return true;
 }
@@ -54,6 +56,7 @@ int RenderFb::outputWrapped(clc::Buffer *b, unsigned int strOffset, bool doBlit)
     // TODO:  proper word wrap
     // TODO:  paginate
 
+    bool wordWrapped = false;
     int width = m_fb->width();
     do {
         // If at start of line, eat spaces
@@ -73,7 +76,8 @@ int RenderFb::outputWrapped(clc::Buffer *b, unsigned int strOffset, bool doBlit)
             if (*end)
                 ++end;
 
-            for ( ; p < end; ++p, --len) {
+            // Output until EOL (\n or wrap)
+            for ( ; p < end && *p != '\n'; ++p, --len) {
                 uint32_t c = *p;
                 if (c > 0x7f) {
                     // Convert UTF8 to UTF32, as required by FreeType
@@ -118,15 +122,18 @@ int RenderFb::outputWrapped(clc::Buffer *b, unsigned int strOffset, bool doBlit)
             }
         }
 
-        if (*p == '\n' || m_penX >= width-1 - settings.marginRight) {
+        // Word-wrap or hard linefeed, but avoid the two back-to-back.
+        if ((*p == '\n' && !wordWrapped) || m_penX >= width-1 - settings.marginRight) {
+            m_col = 0;
             m_penX = settings.marginLeft;
             m_penY += m_lineHeight;
-            m_col = 0;
             if (*p == '\n') {
                 p++;
                 len--;
+            } else {
+                wordWrapped = true;
             }
-            if (m_penY > (int)m_fb->height()) {
+            if (m_penY > (int)m_fb->height() - settings.marginBottom) {
                 return p - start;
             }
         }
@@ -138,6 +145,7 @@ int RenderFb::render(unsigned int pageNum, bool doBlit)
 {
     m_penX = settings.marginLeft;
     m_penY = settings.marginTop;
+    m_fb->clear();
 
     unsigned int layoutOffset;
     unsigned int strOffset;

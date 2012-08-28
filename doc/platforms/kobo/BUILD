@@ -13,7 +13,7 @@ $ ln -s ..blah../KoboLabs/hw/imx508/ntx/linux-2.6.35.3/include/linux/
 
 # Build #
 
-Edit ocher.config.
+Edit ocher.config; at least change OCHER_TARGET to kobo.
 
 ```
 $ make

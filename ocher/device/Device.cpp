@@ -1,7 +1,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
-#ifdef TARGET_KOBOTOUCH
+#ifdef OCHER_TARGET_KOBO
 #include <linux/input.h>
 #endif
 
@@ -46,7 +46,7 @@ clc::Buffer Device::getBuildDate()
 }
 
 
-#ifdef TARGET_KOBOTOUCH
+#ifdef OCHER_TARGET_KOBO
 KoboDeviceThread::KoboDeviceThread()
 {
     m_buttonFd = open("/dev/input/event0", O_RDONLY | O_NONBLOCK);

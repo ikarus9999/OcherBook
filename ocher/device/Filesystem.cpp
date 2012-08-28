@@ -121,7 +121,7 @@ Filesystem fs;
 
 Filesystem::Filesystem()
 {
-#ifdef TARGET_KOBO
+#ifdef OCHER_TARGET_KOBO
     m_home = "/mnt/onboard/.ocher";
     m_settings = "/mnt/onboard/.ocher/settings";
 #else
@@ -140,7 +140,7 @@ Filesystem::Filesystem()
 
 Filesystem::~Filesystem()
 {
-#ifdef TARGET_KOBO
+#ifdef OCHER_TARGET_KOBO
 #elif defined(_WIN32)
 #elif defined(__HAIKU__)
 #else

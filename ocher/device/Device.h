@@ -7,7 +7,7 @@
 #include "ocher/device/Filesystem.h"
 
 
-#ifdef TARGET_KOBOTOUCH
+#ifdef OCHER_TARGET_KOBO
 class KoboDeviceThread : public clc::Thread
 {
 public:
@@ -37,7 +37,7 @@ public:
 
     Filesystem fs;
 
-#ifdef TARGET_KOBOTOUCH
+#ifdef OCHER_TARGET_KOBO
     KoboDeviceThread m_devThread;
 #endif
 };

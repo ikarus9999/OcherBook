@@ -1,13 +1,17 @@
 0.0.8
+font selection (don't hardcode filename!)
 event loop
     SDL event loop vs
 "N of M" for fd and ncurses paging
 
 0.0.9
-factory init/deinit vs new/delete
-check build on multiple platforms
-legible kobo
+margins
+word wrap on fb
+factory init/deinit vs new/delete; cleanup up in error paths; ...
 
+0.1.0
+native win2, haiku builds
+test build on multiple platforms
 
 
 
@@ -27,6 +31,7 @@ layout:
     - margins
     - FreeType:
         - integrate into RenderFd for real word wrap
+    - option to build some fonts into the binary for easy install
 
 build system:
     - config system

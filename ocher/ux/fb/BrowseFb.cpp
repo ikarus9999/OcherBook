@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "ocher/device/Filesystem.h"
 #include "ocher/ux/Renderer.h"
 #include "ocher/ux/fb/BrowseFb.h"
@@ -27,7 +29,8 @@ void BrowseFb::read(Renderer& renderer)
         if (renderer.render(pageNum, true) < 0)
             break;
 
-        break;  //DDD
+        getchar(); //DDD
+        ++pageNum;
     }
 }
 

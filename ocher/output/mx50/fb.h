@@ -30,12 +30,14 @@ public:
     void setUpdateScheme();
     void setAutoUpdateMode(bool autoUpdate);
 
+protected:
     int m_fd;
     char *m_fb;
     size_t m_fbSize;
     int m_marker;
     struct fb_var_screeninfo vinfo;
     struct fb_fix_screeninfo finfo;
+    unsigned int m_clears;
 };
 
 #endif

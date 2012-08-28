@@ -11,6 +11,7 @@ class FreeType
 public:
     FreeType(FrameBuffer *fb);
 
+    bool init();
     void setSize(unsigned int points);
     bool renderGlyph(int c, bool doBlit, int penX, int penY, int *dx, int *dy, int *height);
 
